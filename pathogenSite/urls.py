@@ -18,8 +18,7 @@ from django.contrib import admin
 from pathogenSite import views
 
 urlpatterns = [
-	url(r'^$', views.IntroView.as_view(), name='intro'),
-	url(r'^upload$', views.UploadView.as_view(), name='upload'),
-	url(r'^make-db$', views.MakeDbView.as_view(), name='make-db'),
-	url(r'^blast$', views.BlastView.as_view(), name='blast'),
+	url(r'^$', views.PathogenEditView.as_view(), name='intro'),
+	url(r'^pathogen$', views.PathogenList.as_view(), name='pathogen'),
+	url(r'^test$', views.TestFormView.as_view(), name='test'),
 ]
