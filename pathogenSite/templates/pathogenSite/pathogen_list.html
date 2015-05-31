@@ -2,43 +2,47 @@
 
 {% block title %}Introduction Page{% endblock %}
 {% block content %}
-<ul>
-	<div class="table-responsive">
-		<table class="table table-striped table-hover">
-			<thead>
-				<tr>
-					<td>ID</td>
-					<td>Name</td>
-					<td>Pathogen Human</td>
-				</tr>
-			</thead>
-			<tbody>
-				{% for pathogen in object_list %}
-				<tr>
-					<td>{{ pathogen.uid }}</td>
-					<td>{{ pathogen.name }}</td>
-					<td>{{ pathogen_human }}</td>
-				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-	</div>
-</ul>
-
-{% if is_paginated %}
-<div class="pagination">
-	<span class="page-links">
-		{% if page_obj.has_previous %}
-		<a href="/pathogen?page={{ page_obj.previous_page_number }}">previous</a>
-		{% endif %}
-		<span class="page-current">
-		Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-		</span>
-		{% if page_obj.has_next %}
-		<a href="/pathogen?page={{ page_obj.next_page_number }}">next</a>
-		{% endif %}
-	</span>
+<div>
+	<form>
+		{% csrf_token %}
+		{{ form }}
+		<input type="submit" value="submit">
+	</form>
 </div>
-{% endif %}
+<div class="table-responsive">
+	<table class="table table-striped table-hover">
+		<thead>
+			<tr>
+				<th class="resize">ID</th>
+				<th>Name</th>
+				<th>Pathogen Human</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for pathogen in pathogen_list %}
+			<tr>
+				<td class="uid">
+					<a href = "{% url 'pathogen_detail' pathogen.uid %}">
+						{{ pathogen.uid }}
+					</a>
+				</td>
+				<td>{{ pathogen.name }}</td>
+				<td>{{ pathogen.pathogen_human }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
 
+
+{% endblock %}
+{% block javascript %}
+<script>
+$(function(){
+	$('table th').resizable();
+});
+$("tr").dblclick(function(e){
+	console.log($(this).find('td.uid'));
+});	
+</script>
 {% endblock %}
