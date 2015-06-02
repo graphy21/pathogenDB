@@ -20,7 +20,7 @@ from pathogenSite import views
 urlpatterns = [
 	url(r'^$', views.PathogenEditView.as_view(), name='intro'),
 	url(r'^pathogen$', views.PathogenList.as_view(), name='pathogen'),
-	url(r'^pathogen/(?P<slug>\d+)$', views.PathogenDetail.as_view(),\
-			name='pathogen_detail'),
+	url(r'^pathogen/(?P<slug>\d+)$', views.PathogenUpdateView.as_view(),\
+			name='pathogen_update'),
 	url(r'^test$', views.TestFormView.as_view(), name='test'),
 ]

@@ -1,4 +1,4 @@
-{% load i18n staticfiles %}}
+{% load i18n staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -13,8 +13,12 @@
 	<title>{% block title %} First Page {% endblock %}</title>
 
     <!-- Bootstrap core CSS -->
-	<link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
-	<link href="{% static "jquery-ui-1.11.4/jquery-ui.css" %}" rel="stylesheet">
+	<script src="{% static 'bootstrap/js/jquery.min.js' %}"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	<script src="http://malsup.github.com/jquery.form.js"></script>
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 
 	<!-- Custom styles for this template -->
 
@@ -29,10 +33,12 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <script src="{% static 'jquery-ui-1.11.4/jquery-ui.min.js' %}"></script>
+	<link href="{% static 'jquery-ui-1.11.4/jquery-ui.css' %}" rel="stylesheet">
+	  
   </head>
 
   <body>
-
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -246,12 +252,10 @@
       </div>
     </div>
 
+    {% block javascript %}{% endblock %}
     <!-- Bootstrap core JavaScript
     ================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
-	<script src="{% static 'bootstrap/js/jquery.min.js' %}"></script>
-	<script src="{% static 'jquery-ui-1.11.4/jquery-ui.min.js' %}"></script>
-	<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
     <!-- Just to make our placeholder images work. Don't actually copy the next line! -->
 	<!--
     <script src="../../assets/js/vendor/holder.js"></script>
@@ -260,7 +264,6 @@
 	<!--
     <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
 	-->
-	{% block javascript %}{% endblock %}
   </body>
 </html>
 

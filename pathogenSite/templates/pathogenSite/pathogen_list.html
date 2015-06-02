@@ -1,7 +1,39 @@
 {% extends "pathogenSite/base.html" %}
 
 {% block title %}Introduction Page{% endblock %}
+
+
 {% block content %}
+<div id="myModal2" class="modal fade">
+	<div class="modal-dialog modal-sm">
+		<div class="modal-content">
+			<div class="modal-body" style="text-align: center;">
+				<span class="glyphicon glyphicon-ok-sign">&nbsp;successfully updated</span>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="form-modal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+aria-hidden="true">&times;</button>
+				<h4 class="modal-title">Modal title</h4>
+			</div>
+			<div id="form-modal-body" class="modal-body">
+				<p>One fine body&hellip;</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismi
+ss="modal">Close</button>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <div>
 	<form>
 		{% csrf_token %}
@@ -22,9 +54,14 @@
 			{% for pathogen in pathogen_list %}
 			<tr>
 				<td class="uid">
-					<a href = "{% url 'pathogen_detail' pathogen.uid %}">
+					<a id="edit_pathogen" class="fa fa-pencil" data-toggle="modal" href="{% url 'pathogen_update' pathogen.uid %}" data-target="#modal" title="edit item" data-tooltip>
 						{{ pathogen.uid }}
 					</a>
+					<!--
+					<a href = "{% url 'pathogen_update' pathogen.uid %}">
+						{{ pathogen.uid }}
+					</a>
+					-->
 				</td>
 				<td>{{ pathogen.name }}</td>
 				<td>{{ pathogen.pathogen_human }}</td>
@@ -33,16 +70,41 @@
 		</tbody>
 	</table>
 </div>
-
-
 {% endblock %}
 {% block javascript %}
 <script>
 $(function(){
 	$('table th').resizable();
 });
-$("tr").dblclick(function(e){
-	console.log($(this).find('td.uid'));
-});	
+var formAjaxSubmit = function(form, modal1) {
+	$(form).submit(function (e) {
+		e.preventDefault();
+		$.ajax({
+			type: $(this).attr('method'),
+			url: $(this).attr('action'),
+			data: $(this).serialize(),
+			success: function (xhr, ajaxOptions, thrownError) {
+				if ( $(xhr).find('.has-error').length > 0 ) {
+					$(modal1).find('.modal-body').html(xhr);
+					formAjaxSubmit(form, modal1);
+				} else {
+					$("#myModal2").modal('toggle');
+					setTimeout(function(){$('#myModal2').modal('toggle');}, 2000);
+					$(modal1).modal('toggle');
+				}
+			},
+			error: function (xhr, ajaxOptions, thrownError) {
+			}
+		});
+	});
+}
+$("tr").dblclick(function() {
+	var url = $(this).find('a').attr('href');
+	$('#form-modal-body').load(url, function () {
+		$('#form-modal').modal('toggle');
+		formAjaxSubmit('#form-modal-body form', '#form-modal');
+	});
+});
 </script>
 {% endblock %}
+

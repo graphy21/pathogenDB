@@ -1,0 +1,28 @@
+<div class="row">
+  <form id="pathogen_update_form" method='post' class="form-horizontal" role="form" action='{% url 'pathogen_update' object.uid %}'>
+	<input type="submit" class="btn btn-submit col-md-offset-2">
+    {% csrf_token %}
+	{{ form }}
+    <!--	
+	{{ form.non_field_errors }}
+	{% for field in form %}
+	<div class="form-group">
+	  {% if field.errors %}
+	  <ul class="form-errors">
+		{% for error in field.errors %}
+		<li>
+		  <span class="fa fa-exclamation-triangle"></span> 
+		  <strong>{{ error|escape }}</strong>
+		</li>
+		{% endfor %}
+	  </ul>
+      {% endif %}
+	  {{ field.label_tag }} {{ field }} 
+	  {% if field.help_text %}
+	  <div class="form-helptext">{{ field.help_text }}</div>
+	  {% endif %} 
+    </div>
+	{% endfor %}
+	-->
+  </form>
+</div>
