@@ -6,6 +6,8 @@ from django.template.loader import render_to_string
 from django import forms
 from django.forms import ModelForm
 
+import copy
+
 from pathogenSite.models import Nomen
 
 
@@ -42,8 +44,11 @@ class PathogenList(ListView):
 	paginate_by = 10
 
 	def get_queryset(self):
+		params = copy.deepcopy(self.request.GET)
+		if 'page' in params: params.pop('page')
 		queryset = super(PathogenList, self).get_queryset()
-		self.form = PathogenListForm(self.request.GET or None)
+		#self.form = PathogenListForm(self.request.GET or None)
+		self.form = PathogenListForm(params or None)
 		if self.form.is_valid():
 			name = self.form.cleaned_data.get('name')
 			if name:
