@@ -18,7 +18,7 @@ from django.contrib import admin
 from pathogenSite import views
 
 urlpatterns = [
-	url(r'^$', views.PathogenEditView.as_view(), name='intro'),
+	url(r'^$', views.PathogenEditView.as_view(), name='ezbio-intro'),
 	url(r'^pathogen$', views.PathogenList.as_view(), name='pathogen'),
 	url(r'^pathogen/(?P<slug>\d+)$', views.PathogenUpdateView.as_view(),\
 			name='pathogen_update'),

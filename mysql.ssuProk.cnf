@@ -1,0 +1,5 @@
+[client]
+database = ssu_prok
+user = graphy21
+password = 1234
+default-character-set = utf8

@@ -22,7 +22,7 @@
 
 	<!-- Custom styles for this template -->
 
-	<link href="{% block stylesheet %}{% static 'pathogenSite/css/dashboard.css' %} {% endblock %}" rel="stylesheet">
+	<link href="{% block stylesheet %}{% static 'ssuProkSite/css/dashboard.css' %} {% endblock %}" rel="stylesheet">
 
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
@@ -34,7 +34,7 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <script src="{% static 'jquery-ui-1.11.4/jquery-ui.min.js' %}"></script>
-	<!--<link href="{% static 'jquery-ui-1.11.4/jquery-ui.css' %}" rel="stylesheet">-->
+	<link href="{% static 'jquery-ui-1.11.4/jquery-ui.css' %}" rel="stylesheet">
 	  
   </head>
 
@@ -48,7 +48,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-		  <a class="navbar-brand" href="{% url 'ezbio-intro' %}">EzBio</a>
+		  <a class="navbar-brand" href="{% url 'intro' %}">SSU_PROK DB</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
@@ -67,10 +67,9 @@
 	  <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-			  <li class="active"><a href="{% url 'pathogen' %}">Pathogen Edit</a></li>
-			<li><a href="#">Disease Edit</a></li>
-            <li><a href="#">Pathogen Results</a></li>
-            <li><a href="#">Pathogen Virus</a></li>
+			  <li class="active"><a href="{% url 'taxon-group' %}">Taxon Group</a></li>
+			<li><a href="#">-</a></li>
+            <li><a href="#">-</a></li>
           </ul>
 	    </div>
 		<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
@@ -231,10 +230,10 @@
 	    {% endblock %}
         {% block pagination %}
         {% if is_paginated %}
-        <div class="pagination">
+		<div class="pagination">
           <span class="page-links">
             {% if page_obj.has_previous %}
-            <a href="/pathogen?page={{ page_obj.previous_page_number }}">
+			<a href="{% url 'taxon-group' %}?page={{ page_obj.previous_page_number }}">
               previous
             </a>
             {% endif %}
@@ -242,9 +241,9 @@
               Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
             </span>
             {% if page_obj.has_next %}
-            <a href="/pathogen?page={{ page_obj.next_page_number }}">next</a>
+			<a href="{% url 'taxon-group' %}?page={{ page_obj.next_page_number }}">next</a>
             {% endif %}
-          </span>
+		 </span>
         </div>
         {% endif %}
         {% endblock %}

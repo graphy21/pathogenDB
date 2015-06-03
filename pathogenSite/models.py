@@ -83,8 +83,8 @@ class Nomen(models.Model):
     check_add_list = models.CharField(max_length=50)
 
     class Meta:
-        managed = False
-        db_table = 'nomen'
+		managed = False
+		db_table = 'nomen'
 
 
 class NomenCopy(models.Model):

@@ -75,14 +75,26 @@ WSGI_APPLICATION = 'pathogenDB.wsgi.application'
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+	'default': {
+		'ENGINE': 'django.db.backends.sqlite3',
+		'NAME': 'mydatabase',
+	},
+    'pathogen': {
         'ENGINE': 'django.db.backends.mysql',
 		'OPTIONS': { 
-			'read_default_file': os.path.join(BASE_DIR, 'mysql.cnf') 
+			'read_default_file': os.path.join(BASE_DIR, 'mysql.pathogen.cnf') 
 		},
-    }
+	},
+    'ssuProk': {
+        'ENGINE': 'django.db.backends.mysql',
+		'OPTIONS': { 
+			'read_default_file': os.path.join(BASE_DIR, 'mysql.ssuProk.cnf') 
+		},
+    },
 }
 
+DATABASE_ROUTERS = ['pathogenDB.routers.PathogenRouter',\
+		'pathogenDB.routers.SsuProkRouter']
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -109,5 +121,11 @@ STATIC_URL = '/static/'
 
 INSTALLED_APPS += (
 		'pathogenSite',
+)
+
+# ssuProkSite settings
+
+INSTALLED_APPS += (
+		'ssuProkSite',
 )
 
