@@ -20,6 +20,12 @@ class TaxonGroupQueryForm(ModelForm):
 		model = TaxGroup
 		fields = ['group_name', 'tax_list']
 
+	def __init__(self, *args, **kwargs):
+		super(TaxonGroupQueryForm, self).__init__(*args, **kwargs)
+		self.fields['group_name'].required = False
+		self.fields['tax_list'].required = False
+
+
 
 class TaxonGroupListView(ListView):
 	model = TaxGroup
@@ -35,7 +41,7 @@ class TaxonGroupListView(ListView):
 		if self.form.is_valid():
 			group_name = self.form.cleaned_data.get('group_name')
 			if group_name:
-				queryset = queryset.filter(name__icontains=group_name)
+				queryset = queryset.filter(group_name__icontains=group_name)
 			tax_list = self.form.cleaned_data.get('tax_list')
 			if tax_list:
 				queryset = queryset.filter(tax_list__icontains=tax_list)
