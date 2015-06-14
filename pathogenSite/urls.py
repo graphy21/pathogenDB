@@ -15,12 +15,17 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.contrib.auth.decorators import login_required
 from pathogenSite import views
 
+
 urlpatterns = [
-	url(r'^$', views.PathogenEditView.as_view(), name='ezbio-intro'),
-	url(r'^pathogen$', views.PathogenList.as_view(), name='pathogen'),
-	url(r'^pathogen/(?P<slug>\d+)$', views.PathogenUpdateView.as_view(),\
-			name='pathogen_update'),
+	url(r'^$', login_required(views.PathogenEditView.as_view()),
+		name='ezbio-intro'),
+	url(r'^pathogen$', login_required(views.PathogenList.as_view()), 
+		name='pathogen'),
+	url(r'^pathogen/(?P<slug>\d+)$', 
+		login_required(views.PathogenUpdateView.as_view()),
+		name='pathogen_update'),
 	url(r'^test$', views.TestFormView.as_view(), name='test'),
 ]
