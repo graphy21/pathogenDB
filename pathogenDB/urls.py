@@ -20,6 +20,7 @@ import views
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
 	url(r'^accounts/login', 'django.contrib.auth.views.login', {'template_name': 'pathogenDB/login.html'}, name='login'),
+	url(r'^accounts/logout', 'django.contrib.auth.views.logout', {'template_name': 'pathogenDB/logout.html'}, name='logout'),
     url(r'^$', views.index),
 	url(r'^pathogenSite/', include('pathogenSite.urls')),
 	url(r'^taxon-group/', include('ssuProkSite.urls')),

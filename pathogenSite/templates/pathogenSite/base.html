@@ -49,30 +49,30 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-		  <a class="navbar-brand" href="{% url 'ezbio-intro' %}">EzBio</a>
+					<a class="navbar-brand" href="{% url 'ezbio-intro' %}">EzBio</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">login</a></li>
-            <li><a href="#">register</a></li>
+					<ul class="nav navbar-nav navbar-right">
+						<li><a href="#">{{ request.user }}</a></li>
+						<li><a href="{% url 'logout' %}">logout</a></li>
             <li><a href="#">Help</a></li>
-          </ul>
+					</ul>
+					<!--
           <form class="navbar-form navbar-right">
             <input type="text" class="form-control" placeholder="Search...">
-          </form>
+					</form>
+					-->
         </div>
       </div>
     </nav>
 
     <div class="container-fluid">
 	  <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
-          <ul class="nav nav-sidebar">
-			  <li class="active"><a href="{% url 'pathogen' %}">Pathogen Edit</a></li>
-			<li><a href="#">Disease Edit</a></li>
-            <li><a href="#">Pathogen Results</a></li>
-            <li><a href="#">Pathogen Virus</a></li>
-          </ul>
+      <div class="col-sm-3 col-md-2 sidebar">
+        <ul class="nav nav-sidebar">
+					<li class="active"><a href="{% url 'pathogen' %}">Pathogen List</a></li>
+					<li><a href="#">Pathogen Analysis</a></li>
+        </ul>
 	    </div>
 		<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         {% block content %}
@@ -235,7 +235,7 @@
         <div class="pagination">
           <span class="page-links">
             {% if page_obj.has_previous %}
-            <a href="/pathogen?page={{ page_obj.previous_page_number }}">
+						<a href="?{{ prev_url }}&page={{ page_obj.previous_page_number }}">
               previous
             </a>
             {% endif %}
@@ -243,7 +243,9 @@
               Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
             </span>
             {% if page_obj.has_next %}
-            <a href="/pathogen?page={{ page_obj.next_page_number }}">next</a>
+						<a href="?{{ prev_url }}&page={{ page_obj.next_page_number }}">
+							next
+						</a>
             {% endif %}
           </span>
         </div>
@@ -253,7 +255,7 @@
       </div>
     </div>
 
-    {% block javascript %}{% endblock %}
+		{% block script %}{% endblock %}
     <!-- Bootstrap core JavaScript
     ================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->

@@ -35,7 +35,14 @@ class PathogenListForm(ModelForm):
 	def __init__(self, *args, **kwargs):
 		super(PathogenListForm, self).__init__(*args, **kwargs)
 		self.fields['name'].required = False
+		self.fields['pathogen_human'].required = False
 
+def make_prev_url(info, key):
+	prev_url = []
+	for k,v in info.items():
+		if k != key:
+			prev_url.append('{}={}'.format(k,v))
+	return '&'.join(prev_url)
 
 class PathogenList(ListView):
 	model = Nomen
@@ -59,8 +66,11 @@ class PathogenList(ListView):
 		return queryset
 
 	def get_context_data(self, **kargs):
+		params = copy.deepcopy(self.request.GET)
 		context = super(PathogenList, self).get_context_data(**kargs)
 		context['form'] = self.form
+		prev_url = make_prev_url(params, 'page')
+		context['prev_url'] = prev_url
 		return context
 
 
