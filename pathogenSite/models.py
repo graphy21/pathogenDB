@@ -10,13 +10,18 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User as Auth_user
 
+
+
+class CLCSampleFile(models.Model):
+	name = models.CharField(unique=False, max_length=250)
+	upload_date = models.DateTimeField(auto_now_add=True)
+	clc_file = models.FileField(upload_to='samples')
 
 class CLCSample(models.Model):
-	uid = models.AutoField(primary_key=True)
 	name = models.CharField(unique=False, max_length=250)
-	owner = models.ForeignKey(User)
+	owner = models.ForeignKey(Auth_user)
 	upload_date = models.DateTimeField(auto_now_add=True)
 	clc_file = models.FileField(upload_to='samples')
 	

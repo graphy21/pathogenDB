@@ -117,7 +117,7 @@ STATIC_URL = '/static/'
 
 
 # pathogenSite settings
-MEDIA_ROOT = "/data/home/graphy21/pipeline/pathogenDB/uploaded_files/"
+MEDIA_ROOT = "/Users/graphy21/projects/pathogenDB/uploaded_files/"
 #LANGUAGE_CODE = 'ko'
 
 INSTALLED_APPS += (

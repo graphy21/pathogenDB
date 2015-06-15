@@ -8,7 +8,7 @@ from django.forms import ModelForm
 
 import copy
 
-from pathogenSite.models import Nomen, CLCSample
+from pathogenSite.models import Nomen, CLCSampleFile
 
 
 class TestForm(forms.Form):
@@ -37,12 +37,14 @@ class PathogenListForm(ModelForm):
 		self.fields['name'].required = False
 		self.fields['pathogen_human'].required = False
 
+
 def make_prev_url(info, key):
 	prev_url = []
 	for k,v in info.items():
 		if k != key:
 			prev_url.append('{}={}'.format(k,v))
 	return '&'.join(prev_url)
+
 
 class PathogenList(ListView):
 	model = Nomen
@@ -80,6 +82,7 @@ class PathogenForm(ModelForm):
 		model = Nomen
 		exclude = []	
 
+
 class PathogenUpdateView(UpdateView):
 	model = Nomen
 	form_class = PathogenForm
@@ -110,8 +113,9 @@ class PathogenEditView(TemplateView):
 
 class CLCSampleUploadForm(ModelForm):
 	class Meta:
-		model = CLCSample
+		model = CLCSampleFile
 		exclude = []
+
 	def __init__(self, *args, **kwargs):
 		super(CLCSampleUploadForm, self).__init__(*args, **kwargs)
 
@@ -119,24 +123,26 @@ class CLCSampleUploadForm(ModelForm):
 class CLCSampleUploadFormView(FormView):
 	template_name = 'pathogenSite/sample_upload_form.html'
 	form_class = CLCSampleUploadForm
-
-	def form_valid(self, form):
-		form.save()
+	success_url = '/'
 
 
 	def get_context_data(self, **kargs):
+		print '22222\n\n', self.request.POST
 		context = super(CLCSampleUploadFormView, self).get_context_data(**kargs)
 		context['clicked_nav'] = "sample_upload"
+		print '333333\n\n', context
 		return context
 
+
 class SampleListView(ListView):
-	model = Nomen
-	template_name = 'pathogenSite/pathogen_list.html'
-	context_object_name = 'pathogen_list'
+	model = CLCSampleFile
+	template_name = 'pathogenSite/sample_list.html'
+	context_object_name = 'sample_list'
 	paginate_by = 15
 	def get_context_data(self, **kargs):
 		params = copy.deepcopy(self.request.GET)
 		context = super(SampleListView, self).get_context_data(**kargs)
+		print '11111\n\n', dir(context['object_list'][0])
 		#context['form'] = self.form
 		prev_url = make_prev_url(params, 'page')
 		context['prev_url'] = prev_url
