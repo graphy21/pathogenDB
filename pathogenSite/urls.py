@@ -27,5 +27,10 @@ urlpatterns = [
 	url(r'^pathogen/(?P<slug>\d+)$', 
 		login_required(views.PathogenUpdateView.as_view()),
 		name='pathogen_update'),
+	url(r'^sample$', login_required(views.SampleListView.as_view()),
+		name='sample'),
+	url(r'^sample-upload$',
+		login_required(views.CLCSampleUploadFormView.as_view()), 
+		name='sample-upload'),
 	url(r'^test$', views.TestFormView.as_view(), name='test'),
 ]

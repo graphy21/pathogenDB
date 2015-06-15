@@ -8,7 +8,7 @@ from django.forms import ModelForm
 
 import copy
 
-from pathogenSite.models import Nomen
+from pathogenSite.models import Nomen, CLCSample
 
 
 class TestForm(forms.Form):
@@ -48,7 +48,7 @@ class PathogenList(ListView):
 	model = Nomen
 	template_name = 'pathogenSite/pathogen_list.html'
 	context_object_name = 'pathogen_list'
-	paginate_by = 10
+	paginate_by = 15
 
 	def get_queryset(self):
 		params = copy.deepcopy(self.request.GET)
@@ -71,6 +71,7 @@ class PathogenList(ListView):
 		context['form'] = self.form
 		prev_url = make_prev_url(params, 'page')
 		context['prev_url'] = prev_url
+		context['clicked_nav'] = "pathogen_list"
 		return context
 
 
@@ -106,3 +107,38 @@ class PathogenEditView(TemplateView):
 	template_name = 'pathogenSite/intro.html'
 	pass
 
+
+class CLCSampleUploadForm(ModelForm):
+	class Meta:
+		model = CLCSample
+		exclude = []
+	def __init__(self, *args, **kwargs):
+		super(CLCSampleUploadForm, self).__init__(*args, **kwargs)
+
+
+class CLCSampleUploadFormView(FormView):
+	template_name = 'pathogenSite/sample_upload_form.html'
+	form_class = CLCSampleUploadForm
+
+	def form_valid(self, form):
+		form.save()
+
+
+	def get_context_data(self, **kargs):
+		context = super(CLCSampleUploadFormView, self).get_context_data(**kargs)
+		context['clicked_nav'] = "sample_upload"
+		return context
+
+class SampleListView(ListView):
+	model = Nomen
+	template_name = 'pathogenSite/pathogen_list.html'
+	context_object_name = 'pathogen_list'
+	paginate_by = 15
+	def get_context_data(self, **kargs):
+		params = copy.deepcopy(self.request.GET)
+		context = super(SampleListView, self).get_context_data(**kargs)
+		#context['form'] = self.form
+		prev_url = make_prev_url(params, 'page')
+		context['prev_url'] = prev_url
+		context['clicked_nav'] = "sample_list"
+		return context

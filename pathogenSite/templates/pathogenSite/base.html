@@ -70,10 +70,11 @@
 	  <div class="row">
       <div class="col-sm-3 col-md-2 sidebar">
         <ul class="nav nav-sidebar">
-					<li class="active"><a href="{% url 'pathogen' %}">Pathogen List</a></li>
-					<li><a href="#">Pathogen Analysis</a></li>
+		  <li class="pathogen_list"><a href="{% url 'pathogen' %}">Pathogen List</a></li>
+		  <li class="sample_list"><a href="{% url 'sample' %}">Sample List</a></li>
+		  <li class="sample_upload"><a href="{% url 'sample-upload' %}">Sample Upload</a></li>
         </ul>
-	    </div>
+      </div>
 		<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         {% block content %}
           <h1 class="page-header">Dashboard</h1>
@@ -253,8 +254,15 @@
         {% endblock %}
         </div>
       </div>
-    </div>
+	</div>
 
+	<script>
+		$(document).ready(function(){
+			var clickedNav = '.{{ clicked_nav }}';
+			console.log($('ul.nav-sidebar li').attr('class'));
+			$(clickedNav).addClass('active');
+		});
+	</script>
 		{% block script %}{% endblock %}
     <!-- Bootstrap core JavaScript
     ================================================== -->
