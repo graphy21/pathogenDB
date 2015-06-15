@@ -1,0 +1,20 @@
+{% load i18n staticfiles %}
+<!DOCTYPE html>
+<html>
+  <head>
+	<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">-->
+	<link rel="stylesheet" href="https://bootswatch.com/superhero/bootstrap.min.css">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	{% block script %} {% endblock %}
+  </head>
+   
+  <body>
+	{% block content%}
+	{% endblock %}
+  </body>
+</html>

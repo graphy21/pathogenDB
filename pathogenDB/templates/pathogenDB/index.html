@@ -1,0 +1,24 @@
+{% extends "pathogenDB/base.html" %}
+{% block content %}
+<div class="header clearfix">
+  <h3></h3>
+</div>
+<div class="container col-sm-6 col-sm-offset-3">
+  <div class="jumbotron">
+	<h2>Welcome to Hulk server</h2>
+	<p>Web server for searching, editing records.</p>
+  </div>
+  <div class="row">
+	<div class="col-sm-6" style="text-align: center;">
+	  <a class ="btn btn-success btn-lg col-sm-12" href="{% url 'ezbio-intro'%}">
+		go to pathogen
+	  </a>
+	</div>
+	<div class="col-sm-6" style="text-align: center;">
+	  <a class ="btn btn-info btn-lg col-sm-12" href="{% url 'intro'%}">
+		go to taxGroup
+	  </a>
+	</div>
+  </div>
+</div>
+{% endblock %}
