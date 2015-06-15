@@ -1,8 +1,9 @@
 {% extends 'pathogenSite/base.html' %}
 {% block content %}
-	<form action="{% url 'sample-upload' %}" method="post">
+	<form action="{% url 'sample-upload' %}" method="post" enctype="multipart/form-data">
 		{% csrf_token %}
-		{{form}}
+		{{ form }}
 		<button type="submit" class="btn btn-success">Submit</button>
 	</form>
+
 {% endblock %}

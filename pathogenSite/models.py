@@ -19,6 +19,7 @@ class CLCSampleFile(models.Model):
 	upload_date = models.DateTimeField(auto_now_add=True)
 	clc_file = models.FileField(upload_to='samples')
 
+
 class CLCSample(models.Model):
 	name = models.CharField(unique=False, max_length=250)
 	owner = models.ForeignKey(Auth_user)

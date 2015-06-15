@@ -114,10 +114,15 @@ class PathogenEditView(TemplateView):
 class CLCSampleUploadForm(ModelForm):
 	class Meta:
 		model = CLCSampleFile
-		exclude = []
+		fields = '__all__'
 
 	def __init__(self, *args, **kwargs):
 		super(CLCSampleUploadForm, self).__init__(*args, **kwargs)
+		#self.fields['clc_file'].required = False
+	
+	def clean(self):
+		cleaned_data = super(CLCSampleUploadForm, self).clean()
+		print '11111\n\n', cleaned_data
 
 
 class CLCSampleUploadFormView(FormView):
@@ -125,12 +130,16 @@ class CLCSampleUploadFormView(FormView):
 	form_class = CLCSampleUploadForm
 	success_url = '/'
 
+	def form_valid(self, form):
+		form.save()
+		print "66666666666666666\n\n"
+		return super(CLCSampleUploadFormView, self).form_valid(form)
 
 	def get_context_data(self, **kargs):
-		print '22222\n\n', self.request.POST
+		print '22222\n\n', self.request.POST,self.request.FILES
 		context = super(CLCSampleUploadFormView, self).get_context_data(**kargs)
 		context['clicked_nav'] = "sample_upload"
-		print '333333\n\n', context
+		print '333333\n\n', context, context['form']
 		return context
 
 
@@ -142,7 +151,6 @@ class SampleListView(ListView):
 	def get_context_data(self, **kargs):
 		params = copy.deepcopy(self.request.GET)
 		context = super(SampleListView, self).get_context_data(**kargs)
-		print '11111\n\n', dir(context['object_list'][0])
 		#context['form'] = self.form
 		prev_url = make_prev_url(params, 'page')
 		context['prev_url'] = prev_url
