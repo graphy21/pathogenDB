@@ -7,7 +7,7 @@ from pathogenSite.models import Nomen, CLCSample
 
 
 class PathogenAnalysis(TemplateView):
-	template_name = 'pathogenSite/analysis.html'
+	template_name = 'pathogenSite/temp.html'
 
 	def post(self, request, *args, **kwargs):
 		clc_file = request.POST['sample']
