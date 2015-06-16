@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from pathogenSite import views
 from pathogenSite.views.analysis import PathogenAnalysis
+from pathogenSite.views.report import ReportTest
 
 
 urlpatterns = [
@@ -36,5 +37,8 @@ urlpatterns = [
 	url(r'^sample-analysis$',
 		login_required(PathogenAnalysis.as_view()), 
 		name='sample-analysis'),
+	url(r'^report$',
+		login_required(ReportTest.as_view()), 
+		name='report'),
 	url(r'^test$', views.TestFormView.as_view(), name='test'),
 ]
