@@ -17,6 +17,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from pathogenSite import views
+from pathogenSite.views.analysis import PathogenAnalysis
 
 
 urlpatterns = [
@@ -32,5 +33,8 @@ urlpatterns = [
 	url(r'^sample-upload$',
 		login_required(views.CLCSampleUploadFormView.as_view()), 
 		name='sample-upload'),
+	url(r'^sample-analysis$',
+		login_required(PathogenAnalysis.as_view()), 
+		name='sample-analysis'),
 	url(r'^test$', views.TestFormView.as_view(), name='test'),
 ]

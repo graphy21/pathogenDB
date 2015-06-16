@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import render
 from django.views.generic import (TemplateView, FormView, CreateView, ListView,
 		DetailView, UpdateView)
@@ -8,7 +9,7 @@ from django.forms import ModelForm
 
 import copy
 
-from pathogenSite.models import Nomen, CLCSampleFile
+from pathogenSite.models import Nomen, CLCSample
 
 
 class TestForm(forms.Form):
@@ -113,7 +114,7 @@ class PathogenEditView(TemplateView):
 
 class CLCSampleUploadForm(ModelForm):
 	class Meta:
-		model = CLCSampleFile
+		model = CLCSample
 		fields = '__all__'
 
 	def __init__(self, *args, **kwargs):
@@ -122,29 +123,34 @@ class CLCSampleUploadForm(ModelForm):
 	
 	def clean(self):
 		cleaned_data = super(CLCSampleUploadForm, self).clean()
-		print '11111\n\n', cleaned_data
+		print '11111\n\n', cleaned_data, cleaned_data['owner']
+
+	def is_valid(self):
+		a = super(CLCSampleUploadForm, self).is_valid()
+		print 'gggggggggggg\n\n',a, self.cleaned_data
+		return a
 
 
 class CLCSampleUploadFormView(FormView):
 	template_name = 'pathogenSite/sample_upload_form.html'
 	form_class = CLCSampleUploadForm
-	success_url = '/'
+	#success_url = '/'
+	success_url = reverse_lazy('sample')
 
 	def form_valid(self, form):
+		print '55555555555\n\n', self.request.POST, self.request.FILES
 		form.save()
-		print "66666666666666666\n\n"
 		return super(CLCSampleUploadFormView, self).form_valid(form)
 
 	def get_context_data(self, **kargs):
-		print '22222\n\n', self.request.POST,self.request.FILES
 		context = super(CLCSampleUploadFormView, self).get_context_data(**kargs)
 		context['clicked_nav'] = "sample_upload"
-		print '333333\n\n', context, context['form']
+		print '22222\n\n', context, dir(context['form']), '\n\n', context['form'].errors
 		return context
 
 
 class SampleListView(ListView):
-	model = CLCSampleFile
+	model = CLCSample
 	template_name = 'pathogenSite/sample_list.html'
 	context_object_name = 'sample_list'
 	paginate_by = 15

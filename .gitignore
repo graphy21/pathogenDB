@@ -3,3 +3,4 @@ data
 *.pyc
 *.swp
 */migrations
+uploaded_files

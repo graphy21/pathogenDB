@@ -76,8 +76,10 @@ WSGI_APPLICATION = 'pathogenDB.wsgi.application'
 
 DATABASES = {
 	'default': {
-		'ENGINE': 'django.db.backends.sqlite3',
-		'NAME': 'mydatabase',
+        'ENGINE': 'django.db.backends.mysql',
+		'OPTIONS': { 
+			'read_default_file': os.path.join(BASE_DIR, 'mysql.default.cnf') 
+		},
 	},
     'pathogen': {
         'ENGINE': 'django.db.backends.mysql',
@@ -117,7 +119,7 @@ STATIC_URL = '/static/'
 
 
 # pathogenSite settings
-MEDIA_ROOT = "/Users/graphy21/projects/pathogenDB/uploaded_files/"
+MEDIA_ROOT = "/data/home/graphy21/pipeline/pathogenDB/uploaded_files/"
 #LANGUAGE_CODE = 'ko'
 
 INSTALLED_APPS += (

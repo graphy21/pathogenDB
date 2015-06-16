@@ -11,21 +11,26 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import User as Auth_user
+from time import strftime
 
 
+def user_directory_path(instance, filename):
+	return 'user_{0}/{2}/{1}'.format(instance.owner.id, filename, 
+			strftime('%Y%m%d%H%M%S'))
 
+"""
 class CLCSampleFile(models.Model):
 	name = models.CharField(unique=False, max_length=250)
 	upload_date = models.DateTimeField(auto_now_add=True)
-	clc_file = models.FileField(upload_to='samples')
-
+	clc_file = models.FileField(upload_to=user_directory_path)
+"""
 
 class CLCSample(models.Model):
 	name = models.CharField(unique=False, max_length=250)
 	owner = models.ForeignKey(Auth_user)
 	upload_date = models.DateTimeField(auto_now_add=True)
-	clc_file = models.FileField(upload_to='samples')
-	
+	clc_file = models.FileField(upload_to=user_directory_path)
+
 
 class Nomen(models.Model):
     uid = models.AutoField(primary_key=True)
