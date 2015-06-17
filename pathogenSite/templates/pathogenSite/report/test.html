@@ -4,46 +4,125 @@
 
 
 {% block content %}
-<div id="chart_div"></div>
+<div>
+	<h3>Total Microbiome Distribution</h3>
+	<div id="table_div1" style="float:left;"></div>
+	<div id="chart_div1" style="float:left;"></div>
+	<div id="chart_div2" style="float:left;"></div>
+</div>
+<div style="clear:left;">
+	<h3>Pathogen Distribution</h3>
+</div>
 {% endblock %}
 
 {% block script %}
 <script src="https://www.google.com/jsapi"></script>
 <script>
-	alert('good');
-      // Load the Visualization API and the piechart package.
-      google.load('visualization', '1.0', {'packages':['corechart']});
+function ColorLuminance(hex, lum) {
 
-      // Set a callback to run when the Google Visualization API is loaded.
-      google.setOnLoadCallback(drawChart);
+	// validate hex string
+	hex = String(hex).replace(/[^0-9a-f]/gi, '');
+	if (hex.length < 6) {
+		hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+	}
+	lum = lum || 0;
 
-      // Callback that creates and populates a data table,
-      // instantiates the pie chart, passes in the data and
-      // draws it.
-      function drawChart() {
+	// convert to decimal and change luminosity
+	var rgb = "#", c, i;
+	for (i = 0; i < 3; i++) {
+		c = parseInt(hex.substr(i*2,2), 16);
+		c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+		rgb += ("00"+c).substr(c.length);
+	}
+	return rgb;
+}
+function MakeGradientColors(hex, count){
+	count = count;
+	diff = 1/count;
+	colors = [];
+	for (i=0; i < count; i++){
+		colors.push(ColorLuminance(hex, diff*i));
+	}
+	return colors;
+}
 
-		// Create the data table.
-        //var data = new google.visualization.DataTable();
-        //data.addColumn('string', 'Topping');
-        //data.addColumn('number', 'Slices');
-        ////data.addRows([
-        ////  ['Mushrooms', 3],
-        ////  ['Onions', 1],
-        ////  ['Olives', 1],
-        ////  ['Zucchini', 1],
-        ////  ['Pepperoni', 2]
-		////]);
-		//data.addRows({{ data| safe}});
-		var data = new google.visualization.DataTable({{ total|safe }})
+// Load the Visualization API and the piechart package.
+google.load('visualization', '1.0', {'packages':['corechart', 'table']});
 
-        // Set chart options
-        //var options = {'title':'How Much Pizza I Ate Last Night',
-        //               'width':400,
-        //               'height':300};
-		var options = {{ options|safe }}
-        // Instantiate and draw our chart, passing in some options.
-        var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
-        chart.draw(data, options);
-      }
+// Total Microbiome Distribution
+google.setOnLoadCallback(drawMicrobiomeChart);
+function drawMicrobiomeChart() {
+	// Create the data table.
+	var data = new google.visualization.arrayToDataTable({{ genus|safe }});
+	var view = new google.visualization.DataView(data);
+
+	// Set chart options
+	var options = {{ options|safe }};
+	var species_all = {{ species|safe }};
+
+	// Instantiate and draw our chart, passing in some options.
+	var chart1 = new google.visualization.PieChart(
+		document.getElementById('chart_div1'));
+	var chart2 = new google.visualization.PieChart(
+		document.getElementById('chart_div2'));
+	var table1 = new google.visualization.Table(
+		document.getElementById('table_div1'));
+
+	google.visualization.events.addListener(table1, 'sort', 
+		function(event) {
+			order = data.getSortedRows(
+				[{column: event.column, desc: !event.ascending}]);
+			console.log(order);
+			chart1.draw(data, options);
+	});
+
+	google.visualization.events.addListener(table1, 'select', function() {
+		selection = table1.getSelection();
+		if (selection.length > 0){
+			chart1.setSelection(selection);
+			rowNum = selection[0].row;
+			console.log(selection);
+			console.log(rowNum);
+			genus = view.getValue(rowNum,0);
+			var species = 
+				new google.visualization.arrayToDataTable(species_all[genus]);
+			var initColor = options['colors'][rowNum];
+			var gradientColors = MakeGradientColors(initColor, 5);
+			var options_tt = 
+				{'title': 'species('+ genus +')', 'width':400, 'height':300,
+				'colors': gradientColors};
+			chart2.draw(species, options_tt);
+		};
+	});
+	google.visualization.events.addListener(chart1, 'select', function() {
+		selection = chart1.getSelection();
+		if (selection.length > 0){
+			table1.setSelection(selection);
+			rowNum = selection[0].row;
+			console.log(selection);
+			console.log(rowNum);
+			genus = view.getValue(rowNum,0);
+			var species = 
+				new google.visualization.arrayToDataTable(species_all[genus]);
+			var initColor = options['colors'][rowNum];
+			var gradientColors = MakeGradientColors(initColor, 5);
+			var options_tt = 
+				{'title': 'species('+ genus +')', 'width':400, 'height':300,
+				'colors': gradientColors};
+			chart2.draw(species, options_tt);
+		}
+	});
+
+	table1.draw(view);
+	$('#table_div1 table').addClass('table');
+	chart1.draw(view, options)
+}
+
+// Pathogen Distribution
+google.setOnLoadCallback(drawPathogenChart);
+function drawPathogenChart(){
+	//var data = new google.visualization.arrayToDataTable({{ array_total|safe }});
+};
+
 </script>
 {% endblock %}
