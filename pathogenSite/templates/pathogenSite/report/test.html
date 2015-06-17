@@ -6,13 +6,17 @@
 {% block content %}
 <div>
 	<h3>Total Microbiome Distribution</h3>
-	<div id="table_div1" style="float:left;"></div>
-	<div id="chart_div1" style="float:left;"></div>
-	<div id="chart_div2" style="float:left;"></div>
+	<div id="div1_table1" style="float:left;"></div>
+	<div id="div1_pie1" style="float:left;"></div>
+	<div id="div1_pie2" style="float:left;"></div>
 </div>
+
 <div style="clear:left;">
 	<h3>Pathogen Distribution</h3>
+	<div id="div2_pie1" style="float:left;"></div>
+	<div id="div2_column1" style="float:right;"></div>
 </div>
+
 {% endblock %}
 
 {% block script %}
@@ -62,25 +66,22 @@ function drawMicrobiomeChart() {
 
 	// Instantiate and draw our chart, passing in some options.
 	var chart1 = new google.visualization.PieChart(
-		document.getElementById('chart_div1'));
+		document.getElementById('div1_pie1'));
 	var chart2 = new google.visualization.PieChart(
-		document.getElementById('chart_div2'));
+		document.getElementById('div1_pie2'));
 	var table1 = new google.visualization.Table(
-		document.getElementById('table_div1'));
+		document.getElementById('div1_table1'));
 
 	google.visualization.events.addListener(table1, 'sort', 
 		function(event) {
 			order = data.getSortedRows(
 				[{column: event.column, desc: !event.ascending}]);
-			console.log(order);
 			tablePreToCur = {};
 			tableCurToPre = {};
 			for (i=0; i < order.length; i++){
 				tablePreToCur[order[i]] = i;
 				tableCurToPre[i] = order[i];
 			};
-			console.log(tablePreToCur);
-			console.log([tableCurToPre]);
 			data.sort([{column: event.column, desc: !event.ascending}]);
 			chart1.draw(data, options);
 	});
@@ -94,7 +95,6 @@ function drawMicrobiomeChart() {
 				rowNum = selection[0].row;
 			};
 			chart1.setSelection([{'column':null, 'row':rowNum}]);
-			console.log(rowNum);
 			genus = data.getValue(rowNum,0);
 			var species = 
 				new google.visualization.arrayToDataTable(species_all[genus]);
@@ -115,7 +115,6 @@ function drawMicrobiomeChart() {
 				rowNum = selection[0].row;
 			};
 			table1.setSelection([{'row':rowNum, column:null}]);
-			console.log(rowNum);
 			genus = data.getValue(selection[0].row,0);
 			var species = 
 				new google.visualization.arrayToDataTable(species_all[genus]);
@@ -129,14 +128,25 @@ function drawMicrobiomeChart() {
 	});
 
 	table1.draw(data);
-	$('#table_div1 table').addClass('table');
+	$('#div1_table1 table').addClass('table');
 	chart1.draw(data, options)
 }
 
 // Pathogen Distribution
 google.setOnLoadCallback(drawPathogenChart);
 function drawPathogenChart(){
-	//var data = new google.visualization.arrayToDataTable({{ array_total|safe }});
+	var dataPie1 = new google.visualization.arrayToDataTable({{ pathogen_portion|safe }});
+	var pie1 = new google.visualization.PieChart(
+		document.getElementById('div2_pie1'));
+	pie1.draw(dataPie1, {'title':'Pathogen Proportion', 'width':400, 
+		'height':300, 'colors': ['#109618', '#ff9900', '#dc3912']});
+
+	var dataColumn1 = new google.visualization.arrayToDataTable({{ pathogen_organism|safe }});
+	var column1 = new google.visualization.ColumnChart(
+		document.getElementById('div2_column1'));
+	column1.draw(dataColumn1, {'title':'Pathogens in Organisms', 'width':500, 
+		'height':300, 'colors': ['#dc3912', '#ff9900'], 
+		'legend':{'position':'right'}, 'isStacked':true});
 };
 
 </script>

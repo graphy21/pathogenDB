@@ -60,6 +60,20 @@ class ReportTest(TemplateView):
 		context['species'] = json.dumps(species)
 
 		# Pathogen Distribution
+		pathogen_portion = [\
+				[{"id":"","label":"level","pattern":"","type":"string"},\
+				{"id":"","label":"count","pattern":"","type":"number"}],\
+				['NA',3800],\
+				['Opportunistic Pathogen',17],\
+				['Pathogen',9],\
+			]
+		pathogen_organism = [ 
+				['Pathogen', 'Pathogen', 'Opportunistic Pathogen', 
+					{ 'role': 'annotation' } ], 
+				['Human', 3, 6, ''], ['Animal', 1, 0, ''], ['Plant', 0, 0, '']
+			] 
+		context['pathogen_portion'] = pathogen_portion
+		context['pathogen_organism'] = pathogen_organism
 
 
 		return context
