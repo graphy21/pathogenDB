@@ -73,17 +73,29 @@ function drawMicrobiomeChart() {
 			order = data.getSortedRows(
 				[{column: event.column, desc: !event.ascending}]);
 			console.log(order);
+			tablePreToCur = {};
+			tableCurToPre = {};
+			for (i=0; i < order.length; i++){
+				tablePreToCur[order[i]] = i;
+				tableCurToPre[i] = order[i];
+			};
+			console.log(tablePreToCur);
+			console.log([tableCurToPre]);
+			data.sort([{column: event.column, desc: !event.ascending}]);
 			chart1.draw(data, options);
 	});
 
 	google.visualization.events.addListener(table1, 'select', function() {
 		selection = table1.getSelection();
 		if (selection.length > 0){
-			chart1.setSelection(selection);
-			rowNum = selection[0].row;
-			console.log(selection);
+			if (typeof(tablePreToCur) !== 'undefined'){
+				rowNum = tablePreToCur[selection[0].row];
+			}else{
+				rowNum = selection[0].row;
+			};
+			chart1.setSelection([{'column':null, 'row':rowNum}]);
 			console.log(rowNum);
-			genus = view.getValue(rowNum,0);
+			genus = data.getValue(rowNum,0);
 			var species = 
 				new google.visualization.arrayToDataTable(species_all[genus]);
 			var initColor = options['colors'][rowNum];
@@ -97,14 +109,17 @@ function drawMicrobiomeChart() {
 	google.visualization.events.addListener(chart1, 'select', function() {
 		selection = chart1.getSelection();
 		if (selection.length > 0){
-			table1.setSelection(selection);
-			rowNum = selection[0].row;
-			console.log(selection);
+			if (typeof(tableCurToPre) !== 'undefined'){
+				rowNum = tableCurToPre[selection[0].row];
+			}else{
+				rowNum = selection[0].row;
+			};
+			table1.setSelection([{'row':rowNum, column:null}]);
 			console.log(rowNum);
-			genus = view.getValue(rowNum,0);
+			genus = data.getValue(selection[0].row,0);
 			var species = 
 				new google.visualization.arrayToDataTable(species_all[genus]);
-			var initColor = options['colors'][rowNum];
+			var initColor = options['colors'][selection[0].row];
 			var gradientColors = MakeGradientColors(initColor, 5);
 			var options_tt = 
 				{'title': 'species('+ genus +')', 'width':400, 'height':300,
@@ -113,9 +128,9 @@ function drawMicrobiomeChart() {
 		}
 	});
 
-	table1.draw(view);
+	table1.draw(data);
 	$('#table_div1 table').addClass('table');
-	chart1.draw(view, options)
+	chart1.draw(data, options)
 }
 
 // Pathogen Distribution
