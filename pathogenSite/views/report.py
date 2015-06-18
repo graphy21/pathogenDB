@@ -10,8 +10,8 @@ COLORS = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6",\
 
 
 class ReportTest(TemplateView):
-	#template_name = 'pathogenSite/report/test.html'
-	template_name = 'pathogenSite/report/tt.html'
+	template_name = 'pathogenSite/report/test.html'
+	#template_name = 'pathogenSite/report/tt.html'
 
 	def get_context_data(self, **kwargs): # this will call 'GET' request
 		context = super(ReportTest, self).get_context_data(**kwargs)
@@ -120,5 +120,28 @@ class ReportTest(TemplateView):
 		context['pathogen_portion'] = pathogen_portion
 		context['pathogen_organism'] = pathogen_organism
 
+		# Pathogen Information
+		group = {
+			"nodes":[
+				{"name":"[Group] Escherichia coli","group":1},
+				{"name":"Escherichia coli","group":2},
+				{"name":"Shigella flexneri","group":2},
+				{"name":"Shigella sonnei","group":2},
+				{"name":"Shigella boydii","group":2},
+				{"name":"Escherichia albertii","group":2},
+				{"name":"Shigella dysenteriae","group":2},
+				{"name":"Escherichia fergusonii","group":2},
+			], 
+			"links":[
+				{"source":1,"target":0,"value":1},
+				{"source":2,"target":0,"value":1},
+				{"source":3,"target":0,"value":1},
+				{"source":4,"target":0,"value":1},
+				{"source":5,"target":0,"value":1},
+				{"source":6,"target":0,"value":1},
+				{"source":7,"target":0,"value":1},
+			]
+		}
+		context['group'] = group
 
 		return context
