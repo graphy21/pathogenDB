@@ -11,9 +11,54 @@ COLORS = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6",\
 
 class ReportTest(TemplateView):
 	template_name = 'pathogenSite/report/test.html'
+	#template_name = 'pathogenSite/report/tt.html'
 
 	def get_context_data(self, **kwargs): # this will call 'GET' request
 		context = super(ReportTest, self).get_context_data(**kwargs)
+		# Total Summary
+		total_summary = [
+				[{"label":"From", "type":"string"},
+					{"label":"to", "type":"string"},
+					{"label":"read count", "type":"number"}],
+				['raw', 'Blautia', 4],
+				['raw', 'Streptococcus', 17],
+				['raw', 'Escherichia', 43],
+				['raw', 'Lactobacillus', 17],
+				['raw', 'Catenibacterium', 24],
+				['Blautia', 'b1', 3],
+				['Blautia', 'b2', 1],
+				['Streptococcus', 's1', 7],
+				['Streptococcus', 's2', 10],
+				['Escherichia', 'e1', 11],
+				['Escherichia', 'e2', 11],
+				['Escherichia', 'e3', 11],
+				['Escherichia', 'e4', 10],
+				['Lactobacillus', 'l1', 7],
+				['Lactobacillus', 'l2', 10],
+				['Catenibacterium', 'c1', 7],
+				['Catenibacterium', 'c2', 7],
+				['Catenibacterium', 'c3', 10],
+				['b1', 'NA', 3],
+				['b2', 'NA', 1],
+				['s1', 'NA', 7],
+				['s2', 'Oppotunistic pathogen', 1],
+				['s2', 'NA', 9],
+				['e1', 'Oppotunistic pathogen', 2],
+				['e1', 'Pathogen', 1],
+				['e1', 'NA', 8],
+				['e2', 'NA', 11],
+				['e3', 'NA', 11],
+				['e4', 'NA', 10],
+				['l1', 'NA', 7],
+				['l2', 'NA', 10],
+				['c1', 'NA', 7],
+				['c2', 'NA', 7],
+				['c3', 'Pathogen', 1],
+				['c3', 'NA', 9],
+				['Oppotunistic pathogen', 'Human', 3],
+				['Pathogen', 'Human Pathogen', 2],
+				]
+		context['total_summary'] = total_summary
 
 		# Total Microbiome Distribution
 		options = {'title':'Genus', 'width':400, 'height':300, 'colors': COLORS}
@@ -63,7 +108,7 @@ class ReportTest(TemplateView):
 		pathogen_portion = [\
 				[{"id":"","label":"level","pattern":"","type":"string"},\
 				{"id":"","label":"count","pattern":"","type":"number"}],\
-				['NA',3800],\
+				['NA',1000],\
 				['Opportunistic Pathogen',17],\
 				['Pathogen',9],\
 			]

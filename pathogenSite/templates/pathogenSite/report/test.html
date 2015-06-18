@@ -4,17 +4,57 @@
 
 
 {% block content %}
-<div>
-	<h3>Total Microbiome Distribution</h3>
-	<div id="div1_table1" style="float:left;"></div>
-	<div id="div1_pie1" style="float:left;"></div>
-	<div id="div1_pie2" style="float:left;"></div>
+<div class="div1">
+	<hr>
+	<h3>Total Summary</h3>
+	<div id="div1_sankey1"></div>
 </div>
 
-<div style="clear:left;">
-	<h3>Pathogen Distribution</h3>
+<div class="div2">
+	<hr>
+	<h3>Total Microbiome Distribution</h3>
+	<div id="div2_table1" style="float:left;"></div>
 	<div id="div2_pie1" style="float:left;"></div>
-	<div id="div2_column1" style="float:right;"></div>
+	<div id="div2_pie2" style="float:left;"></div>
+</div>
+
+<div style="clear:left;" class="div3">
+	<hr>
+	<h3>Pathogen Distribution</h3>
+	<div id="div3_pie1" style="float:left;"></div>
+	<div id="div3_column1" style="float:right;"></div>
+</div>
+
+<div style="clear:right;" class="div4">
+	<hr>
+	<h3>Pathogen Information</h3>
+	<div class="col-sm-4 composition">good</div>
+	<div class="col-sm-12">
+		<table class="table">
+			<thead>
+				<tr>
+					<th><Strong>Species</Strong></th>
+					<th><a class="group">[GROUP]</a> <i>Escherichia coli</i></th>
+				</tr>
+			<thead>
+			<tbody>
+				<tr>
+					<td><strong>Basonym</strong></td>
+					<td><i>Bacterium coli commune, Bacillus coli, 
+							Bacterium coli
+					</i></td>
+				</tr>
+				<tr>
+					<td><strong>Taxonomy Group</strong></td>
+					<td><i>Escherichia coli, Shigella flexneri, 
+							Shigella sonnei, Shigella boydii, 
+							Escherichia albertii, Shigella dysenteriae, 
+							Escherichia fergusonii
+					</i></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
 </div>
 
 {% endblock %}
@@ -23,7 +63,6 @@
 <script src="https://www.google.com/jsapi"></script>
 <script>
 function ColorLuminance(hex, lum) {
-
 	// validate hex string
 	hex = String(hex).replace(/[^0-9a-f]/gi, '');
 	if (hex.length < 6) {
@@ -46,14 +85,30 @@ function MakeGradientColors(hex, count){
 	colors = [];
 	for (i=0; i < count; i++){
 		colors.push(ColorLuminance(hex, diff*i));
-	}
+	};
 	return colors;
 }
 
 // Load the Visualization API and the piechart package.
-google.load('visualization', '1.0', {'packages':['corechart', 'table']});
+google.load('visualization', '1.1', 
+	{'packages':['corechart', 'table', 'sankey']});
 
-// Total Microbiome Distribution
+//// Total Summary
+google.setOnLoadCallback(drawTotalChart);
+function drawTotalChart(){
+	var data = new google.visualization.arrayToDataTable(
+		{{ total_summary|safe }});
+	var colors = ['#a6cee3', '#b2df8a', '#fb9a99', '#fdbf6f', '#cab2d6', 
+		'#ffff99', '#1f78b4', '#33a02c'];
+	var options = {width: 800, height: 450, sankey:{'node': {'colors':colors},
+		'link':{'colorMode':'gradient', 'colors':colors}
+	}};
+	var sankey1 = new google.visualization.Sankey(
+		document.getElementById('div1_sankey1'));
+	sankey1.draw(data, options);	
+};
+
+//// Total Microbiome Distribution
 google.setOnLoadCallback(drawMicrobiomeChart);
 function drawMicrobiomeChart() {
 	// Create the data table.
@@ -66,11 +121,11 @@ function drawMicrobiomeChart() {
 
 	// Instantiate and draw our chart, passing in some options.
 	var chart1 = new google.visualization.PieChart(
-		document.getElementById('div1_pie1'));
+		document.getElementById('div2_pie1'));
 	var chart2 = new google.visualization.PieChart(
-		document.getElementById('div1_pie2'));
+		document.getElementById('div2_pie2'));
 	var table1 = new google.visualization.Table(
-		document.getElementById('div1_table1'));
+		document.getElementById('div2_table1'));
 
 	google.visualization.events.addListener(table1, 'sort', 
 		function(event) {
@@ -124,30 +179,34 @@ function drawMicrobiomeChart() {
 				{'title': 'species('+ genus +')', 'width':400, 'height':300,
 				'colors': gradientColors};
 			chart2.draw(species, options_tt);
-		}
+		};
 	});
 
 	table1.draw(data);
-	$('#div1_table1 table').addClass('table');
-	chart1.draw(data, options)
+	$('#div2_table1 table').addClass('table');
+	chart1.draw(data, options);
 }
 
-// Pathogen Distribution
+//// Pathogen Distribution
 google.setOnLoadCallback(drawPathogenChart);
 function drawPathogenChart(){
 	var dataPie1 = new google.visualization.arrayToDataTable({{ pathogen_portion|safe }});
 	var pie1 = new google.visualization.PieChart(
-		document.getElementById('div2_pie1'));
+		document.getElementById('div3_pie1'));
 	pie1.draw(dataPie1, {'title':'Pathogen Proportion', 'width':400, 
-		'height':300, 'colors': ['#109618', '#ff9900', '#dc3912']});
+		'height':300, 'colors': ['#109618', '#ff9900', '#dc3912'],
+		'slices': {1:{'offset':0.15}, 2:{'offset':0.2}}
+	});
 
 	var dataColumn1 = new google.visualization.arrayToDataTable({{ pathogen_organism|safe }});
 	var column1 = new google.visualization.ColumnChart(
-		document.getElementById('div2_column1'));
+		document.getElementById('div3_column1'));
 	column1.draw(dataColumn1, {'title':'Pathogens in Organisms', 'width':500, 
 		'height':300, 'colors': ['#dc3912', '#ff9900'], 
-		'legend':{'position':'right'}, 'isStacked':true});
+		'legend':{'position':'right'}, 'isStacked':true, 
+	});
 };
 
+////
 </script>
 {% endblock %}
