@@ -15,7 +15,8 @@ class ReportTest(TemplateView):
 
 	def get_context_data(self, **kwargs): # this will call 'GET' request
 		context = super(ReportTest, self).get_context_data(**kwargs)
-		# Total Summary
+		context['clicked_nav'] = 'report_test'
+		# Read Count Assignment Flow
 		total_summary = [
 				[{"label":"From", "type":"string"},
 					{"label":"to", "type":"string"},
@@ -55,10 +56,39 @@ class ReportTest(TemplateView):
 				['c2', 'NA', 7],
 				['c3', 'Pathogen', 1],
 				['c3', 'NA', 9],
-				['Oppotunistic pathogen', 'Human', 3],
-				['Pathogen', 'Human Pathogen', 2],
+				['Oppotunistic pathogen', 'Human Pathogen', 3],
+				['Pathogen', 'Human Pathogen', 1],
+				['Pathogen', 'Animal Pathogen', 1],
 				]
 		context['total_summary'] = total_summary
+
+		# Possible Pathogens & Diseases
+		root = {
+			"name": "flare",
+			"children": [
+				{
+				"name": "analytics",
+				"children": [
+					{ "name": "cluster",
+					"children": [
+						{"name": "AgglomerativeCluster", "size": 3938},
+						{"name": "CommunityStructure", "size": 3812},
+						{"name": "HierarchicalCluster", "size": 6714},
+						{"name": "MergeEdge", "size": 743}
+						]},
+					{"name": "graph",
+					"children": [
+						{"name": "BetweennessCentrality", "size": 3534},
+						{"name": "LinkDistance", "size": 5731},
+						{"name": "MaxFlowMinCut", "size": 7840},
+						{"name": "ShortestPaths", "size": 5914},
+						{"name": "SpanningTree", "size": 3416}
+						]},
+					]
+				},
+			]
+		}
+		context['root'] = json.dumps(root)
 
 		# Total Microbiome Distribution
 		options = {'title':'Genus', 'width':400, 'height':300, 'colors': COLORS}
