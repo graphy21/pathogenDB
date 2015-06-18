@@ -10,8 +10,8 @@ COLORS = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6",\
 
 
 class ReportTest(TemplateView):
-	template_name = 'pathogenSite/report/test.html'
-	#template_name = 'pathogenSite/report/tt.html'
+	#template_name = 'pathogenSite/report/test.html'
+	template_name = 'pathogenSite/report/tt.html'
 
 	def get_context_data(self, **kwargs): # this will call 'GET' request
 		context = super(ReportTest, self).get_context_data(**kwargs)
@@ -20,11 +20,11 @@ class ReportTest(TemplateView):
 				[{"label":"From", "type":"string"},
 					{"label":"to", "type":"string"},
 					{"label":"read count", "type":"number"}],
-				['raw', 'Blautia', 4],
-				['raw', 'Streptococcus', 17],
-				['raw', 'Escherichia', 43],
-				['raw', 'Lactobacillus', 17],
-				['raw', 'Catenibacterium', 24],
+				['total read', 'Blautia', 4],
+				['total read', 'Streptococcus', 17],
+				['total read', 'Escherichia', 43],
+				['total read', 'Lactobacillus', 17],
+				['total read', 'Catenibacterium', 24],
 				['Blautia', 'b1', 3],
 				['Blautia', 'b2', 1],
 				['Streptococcus', 's1', 7],
