@@ -10,8 +10,8 @@ COLORS = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6",\
 
 
 class ReportTest(TemplateView):
-	template_name = 'pathogenSite/report/test.html'
-	#template_name = 'pathogenSite/report/tt.html'
+	#template_name = 'pathogenSite/report/test.html'
+	template_name = 'pathogenSite/report/tt.bubble.html'
 
 	def get_context_data(self, **kwargs): # this will call 'GET' request
 		context = super(ReportTest, self).get_context_data(**kwargs)
@@ -66,16 +66,16 @@ class ReportTest(TemplateView):
 		root = {
 				"name": "Pathogen",
 				"children": [
-					{"name": "Human Pathogen",
+					{"name": "endocarditis",
 					"children": [
 						{"name": "Streptococcus sanguinis", "size": 10},
 						{"name": "[GROUP] Escherichia coli", "size": 3},
 						{"name": "Granulicatella adiacens", "size": 2},
 						{"name": "Streptococcus mitis", "size": 11}
 						]},
-					{"name": "Animal Pathogen",
+					{"name": "Actinomycosis",
 					"children": [
-						{"name": "BetweennessCentrality", "size": 2},
+						{"name": "Actinomyces gerencseriae", "size": 2},
 						]},
 					]
 				}
