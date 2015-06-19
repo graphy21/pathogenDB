@@ -64,30 +64,21 @@ class ReportTest(TemplateView):
 
 		# Possible Pathogens & Diseases
 		root = {
-			"name": "flare",
-			"children": [
-				{
-				"name": "analytics",
+				"name": "Pathogen",
 				"children": [
-					{ "name": "cluster",
+					{"name": "Human Pathogen",
 					"children": [
-						{"name": "AgglomerativeCluster", "size": 3938},
-						{"name": "CommunityStructure", "size": 3812},
-						{"name": "HierarchicalCluster", "size": 6714},
-						{"name": "MergeEdge", "size": 743}
+						{"name": "Streptococcus sanguinis", "size": 10},
+						{"name": "[GROUP] Escherichia coli", "size": 3},
+						{"name": "Granulicatella adiacens", "size": 2},
+						{"name": "Streptococcus mitis", "size": 11}
 						]},
-					{"name": "graph",
+					{"name": "Animal Pathogen",
 					"children": [
-						{"name": "BetweennessCentrality", "size": 3534},
-						{"name": "LinkDistance", "size": 5731},
-						{"name": "MaxFlowMinCut", "size": 7840},
-						{"name": "ShortestPaths", "size": 5914},
-						{"name": "SpanningTree", "size": 3416}
+						{"name": "BetweennessCentrality", "size": 2},
 						]},
 					]
-				},
-			]
-		}
+				}
 		context['root'] = json.dumps(root)
 
 		# Total Microbiome Distribution
