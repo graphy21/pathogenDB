@@ -10,8 +10,8 @@ COLORS = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6",\
 
 
 class ReportTest(TemplateView):
-	#template_name = 'pathogenSite/report/test.html'
-	template_name = 'pathogenSite/report/tt.bubble.html'
+	template_name = 'pathogenSite/report/test.html'
+	#template_name = 'pathogenSite/report/tt.bubble.html'
 
 	def get_context_data(self, **kwargs): # this will call 'GET' request
 		context = super(ReportTest, self).get_context_data(**kwargs)
