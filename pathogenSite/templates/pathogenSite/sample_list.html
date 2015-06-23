@@ -19,7 +19,7 @@
 		<tbody>
 			{% for sample in sample_list %}
 			<tr>
-				<td><input type="checkbox" name="sample" value="{{ sample.clc_file.file.file.name }}"></td>
+				<td><input type="checkbox" id="sample" name="sample" value="{{ sample.clc_file.file.file.name }}"></td>
 				<td class="uid"><a href="{% url 'sample-analysis'%}">
 						{{ sample.name }}</a>
 				</td>
