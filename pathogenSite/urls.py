@@ -41,5 +41,5 @@ urlpatterns = [
 		#login_required(ReportTest.as_view()), 
 		ReportTest.as_view(), 
 		name='report'),
-	url(r'^test$', views.TestFormView.as_view(), name='test'),
+	url(r'^test$', views.TestView.as_view(), name='test'),
 ]

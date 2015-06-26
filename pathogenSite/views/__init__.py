@@ -8,20 +8,14 @@ from django import forms
 from django.forms import ModelForm
 
 import copy
+import json
 
 from pathogenSite.models import Nomen, CLCSample
 
 
-class TestForm(forms.Form):
-	name = forms.CharField(label="good", max_length=10)
 
-
-class TestFormView(FormView):
+class TestView(TemplateView):
 	template_name = 'pathogenSite/test.html'
-	form_class = TestForm
-
-	def form_valid(self,form):
-		return HttpResponse('good')
 
 
 class PathogenListForm(ModelForm):

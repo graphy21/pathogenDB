@@ -25,7 +25,7 @@ class PathogenAnalysis(TemplateView):
 		# Pathogen Distribution
 		# Pathogen Information
 		
-		context['well'] = clc_file
+		context['well'] = reporter.get_clc_file()
 		return super(PathogenAnalysis, self).render_to_response(context)
 
 	def get_context_data(self, **kwargs): # this will be called 'GET' request

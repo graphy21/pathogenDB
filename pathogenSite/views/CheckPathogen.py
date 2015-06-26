@@ -23,11 +23,9 @@ PASSWORD = "1234"
 CUTOFF_HIT1 = 0.97
 CUTOFF_GAP = 0  # diff between hit1_sim, hit2_sim 
 
-PATH_SOURCE = os.path.dirname(os.path.abspath(__file__))
-PATH_DATA = os.path.join(PATH_SOURCE, '..', 'data')
-DOCX_TEMPLATE = os.path.join(PATH_DATA, 'templates/template_new.docx')
+PATH_DATA = '/data/home/graphy21/pipeline/pathogenPipeline/data/taxonomy'
 MICROBIOME_CLASSIFICATION_FILE = os.path.join(PATH_DATA,\
-		'taxonomy/taxprofiletree.txt')
+		'taxfulltree.txt')
 PATHOGEN_ID = {
 		'0': 'NA',
 		'1': 'Not Pathogen',
@@ -53,6 +51,8 @@ RANK = {
 		'subspecies' : '13',
 		'strain' : '14',
 }
+RANK_REV = {value:key for key,value in RANK.items() if key != 'root'}
+
 
 
 class CLCparser:
@@ -106,7 +106,6 @@ class CLCparser:
 			query = "select * from {0}".format(table)
 		results = self.cursor.execute(query)
 		return results.fetchall()
-
 
 	def get_field(self, table, field, return_count=None):
 		"""
@@ -168,26 +167,239 @@ class MySQLdbParser:
 		query = "select {0} from {1} where {2}='{3}'".\
 				format(field, table, where_field, where_value)
 		return self.execute_query(query)
+
+
+class TaxonomyNode:
+	def __init__(self, name, rank, parent_node):
+		"""
+		rank is "string" such as "domain", "kingdom".
+		"""
+		self.name = name
+		self.rank = rank
+		self.parent_node = parent_node
+		self.children = []
+	
+	def set_children(self, child_node):
+		self.children.append(child_node)
+
+
+class TaxonomyTree:
+	def __init__(self, file_):
+		self.file_ = file_
+		self.nodes_list = []
+		self.nodes_index = {}
+		self.parseFile()
+	
+	def parseFile(self):
+		with open(self.file_) as f:
+			line = f.readline() # skip title
+			line = f.readline()
+			name, depth, parent = line.strip().split('|')
+			root_node = TaxonomyNode(name, 'root', '')
+			self.nodes_list.append(root_node)
+			self.nodes_index[name] = root_node
+			line = f.readline()
+			while line:
+				sp = line.strip().split('|')
+				if len(sp) != 3:
+					break
+				name, depth, parent = sp
+				parent_node = self.nodes_list[int(parent)]
+				node = TaxonomyNode(name, RANK_REV[depth], parent_node)
+				self.nodes_list.append(node)
+				self.nodes_index[name] = node
+				parent_node.set_children(node)
+				line = f.readline()
+
+	def get_nodes(self):
+		return self.nodes_list
+
+	def get_nodes_index(self):
+		return self.nodes_index
 	
 
 class MicrobiomeClassificationTree:
 	def __init__(self, file_):
 		self.file_ = file_
-		self.node_rank = {}
-		self.node_name = {}
-		with open(self.file_, 'r') as f:
-			line = f.readline()
-			while line:
-				uid, name, rank = line.strip().split('\t')
-				self.node_rank[uid] = rank
-				self.node_name[uid] = name
-				line = f.readline()
-	
-	def get_rank(self, uid):
-		return self.node_rank[uid]
+		self.tree = TaxonomyTree(self.file_)
+		self.nodes_list = self.tree.get_nodes()
+		self.nodes_index = self.tree.get_nodes_index()
 
-	def get_name(self, uid):
-		return self.node_name[uid]
+	def get_rank(self, name):
+		node = self.nodes_index.get(name)
+		return (node.rank if node else None)
+
+	def get_parent_info(self, name):
+		node = self.nodes_index.get(name)
+		parent_node = node.parent_node
+		return (parent_node.name, parent_node.rank)
+	
+	def get_name(self, id):
+		if type(id) != int:
+			id = int(id)
+		return self.nodes_list[id].name
+
+	def get_node_by_name(self, name):
+		return self.nodes_index[name]
+
+	def get_node_by_id(self, id):
+		return self.nodes_list[name]
+
+
+class Reporter:
+	def __init__(self, clc_file):
+		self.clc_file = clc_file
+		self.cp = CLCparser(self.clc_file)
+		self.sp = MySQLdbParser(PATHOGEN_DB_HOST, USER, PASSWORD, 'ssu_prok')
+		self.pp = MySQLdbParser(PATHOGEN_DB_HOST, USER, PASSWORD, 'pathogen')
+		self.mc = MicrobiomeClassificationTree(MICROBIOME_CLASSIFICATION_FILE)
+
+		self.assigned_node = []
+
+		self.clc_total_read_count = 0
+		self.micro_dist = {}
+		self.tax_group = {}
+		self.tax_group_info = {}
+		self.processing_log = {}
+
+		self.populate_microbiome_distribution()
+		self.populate_tax_group()
+		#self.populate_pathogen()
+	
+	def populate_microbiome_distribution(self):
+		"""
+		populates "clc_total_read_count", "micro_dist" variable
+		"""
+		records = self.cp.get_record('profile_mc')
+		for record in records:
+			uid, count = record
+			name = self.mc.get_name(uid)
+			rank = self.mc.get_rank(name)
+			try:
+				self.micro_dist[rank][name] = count
+			except:
+				self.micro_dist[rank] = {name: count}
+		self.clc_total_read_count = self.cp.get_row_count('raw_read')
+
+	def populate_tax_group(self):
+		"""
+		populate "tax_group", "tax_group_info"
+		"""
+		tax_groups = self.sp.get_record('tax_group')
+		for tax_group in tax_groups:
+			representative = tax_group[1]
+			species = tax_group[2].split('|')
+			self.tax_group_info[representative] = ', '.join(species)
+			for comp in species:
+				self.tax_group[comp] = representative
+
+	def populate_pathogen(self):
+		pass
+		log_assign_count = 0
+		log_confirmed = 0
+		log_having_name = 0
+		log_pathogen = 0
+
+		records = self.cp.get_record('assign')
+		for record in records:
+			confirmed = None 
+			acc = record[4]
+			hit1_sim = record[5]
+			hit2_sim = record[8]
+			sequence_uid = record[0]
+			# get read_count
+			read_count = 1
+			if sequence_uid < 0:
+				contig_uid = -(sequence_uid)
+				read_count = self.cp.get_field_with_where('contig', 
+						'read_count', 'contig_uid', contig_uid)[0][0]
+			log_assign_count += read_count
+			# check confirmed
+			if not ((hit1_sim >= CUTOFF_HIT1) and\
+					((hit1_sim - hit2_sim) > CUTOFF_GAP)):
+				continue
+			log_confirmed += read_count
+			# get name
+			name_record = self.sp.get_record_with_where('seq', 'acc', acc)
+			if (not name_record) or (not name_record[0][5]):
+				continue
+			log_having_name += read_count
+			name = name_record[0][5]
+			# check tax group
+			group_name = self.tax_group.get(name)
+			is_group = True
+			if not group_name:
+				group_name = name
+				is_group = False
+			# check pathogen
+			pathogen_record = self.pp.get_record_with_where('nomen', 'name', 
+					group_name)
+			if not pathogen_record:
+				continue
+			log_pathogen += read_count
+			# make data
+			informations = {
+				'is_group': is_group,
+				'species': pathogen_record[1],
+				'basonym': pathogen_record[8],
+				'taxonomy_group': tax_group_info_all.get(group_name),
+				'pathogen_human': pathogen_record[24],
+				'pathogen_animal': pathogen_record[25],
+				'pathogen_plant': pathogen_record[26],
+				'pathogen_disease_kor': pathogen_record[31],
+				'pathogen_disease': pathogen_record[32],
+				'pathogen_route_kor': pathogen_record[33],
+				'pathogen_route': pathogen_record[34],
+				'pathogen_symptom_kor': pathogen_record[35],
+				'pathogen_symptom': pathogen_record[36],
+				'pathogen_prognosis_kor': pathogen_record[37],
+				'pathogen_prognosis': pathogen_record[38],
+				'pathogen_treatment_kor': pathogen_record[39],
+				'pathogen_treatment': pathogen_record[40],
+				'pathogen_link': "http://en.wikipedia.org/", #pathogen_record[]
+				}
+			try:
+				pathogen_count_human[informations['pathogen_human']][nomen]\
+						+= read_count
+			except:
+				try:
+					pathogen_count_human[informations['pathogen_human']][nomen]\
+							= read_count
+				except:
+					pathogen_count_human[informations['pathogen_human']] =\
+							{nomen: read_count}
+			try:
+				pathogen_count_animal[informations['pathogen_animal']][nomen]\
+						+= read_count
+			except:
+				try:
+					pathogen_count_animal[informations['pathogen_animal']]\
+							[nomen] = read_count
+				except:
+					pathogen_count_animal[informations['pathogen_animal']] =\
+							{nomen: read_count}
+			try:
+				pathogen_count_plant[informations['pathogen_plant']][nomen]\
+						+= read_count
+			except:
+				try:
+					pathogen_count_plant[informations['pathogen_plant']][nomen]\
+							= read_count
+				except:
+					pathogen_count_plant[informations['pathogen_plant']] =\
+							{nomen: read_count}
+			pathogen_info[nomen] = informations
+
+		print 'RAW_READ COUNT  :: ', total_read_count
+		print 'ASSIGN_COUNT    :: ', check_assign_count
+		print 'FILTERED COUNT (confirmed)          :: ', check_confirmed
+		print 'FILTERED COUNT (pathogen_record)    :: ', check_pathogen_record
+		print 'FILTERED COUNT (ssu_prok->pathogen) :: ', check_sp2pp
+		print 'PASSED COUNT    :: ', check_pathogen
+
+
+	def get_clc_file(self):
+		return self.clc_file
 
 
 def make_pathogen_portion_data(pathogen_count):
@@ -251,10 +463,6 @@ def make_pathogen_table_data(pathogen_info):
 	return table_data
 
 
-class Reporter:
-	def __init__(self, clc_file):
-		self.clc_file = clc_file
-		self.cp = CLCparser(self.clc_file)
 
 
 def main(clc_file, output_file):

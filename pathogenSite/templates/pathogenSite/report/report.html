@@ -70,6 +70,13 @@
 
 {% block script %}
 <style>
+@media print and (width: 21cm) and (height: 29.7cm) {
+	@page .print-landscape-a4 {
+	   margin: 3cm;
+	   size: A4 landscape;
+	}
+}
+
 .link {
   stroke: #ccc;
 }  
