@@ -26,7 +26,7 @@ CUTOFF_GAP = 0  # diff between hit1_sim, hit2_sim
 PATH_DATA = '/data/home/graphy21/pipeline/pathogenPipeline/data/taxonomy'
 MICROBIOME_CLASSIFICATION_FILE = os.path.join(PATH_DATA,\
 		'taxfulltree.txt')
-ACC2NAME_FILE = os.path.join(PATH_DATA, acc2name.tsv)
+ACC2NAME_FILE = os.path.join(PATH_DATA, 'acc2name.tsv')
 PATHOGEN_ID = {
 		'0': 'NA',
 		'1': 'Not Pathogen',
@@ -263,7 +263,7 @@ class AccNameConverter:
 				line = f.readline()
 
 	def populate_name2acc():
-		for key,value for self.acc2name.items():
+		for key,value in self.acc2name.items():
 			self.name2acc[value] = key
 
 	def get_name(self, acc):
