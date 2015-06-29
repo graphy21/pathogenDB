@@ -17,6 +17,10 @@ from pathogenSite.models import Nomen, CLCSample
 class TestView(TemplateView):
 	template_name = 'pathogenSite/test.html'
 
+	def get_context_data(self, **kargs):
+		context = super(TestView, self).get_context_data(**kargs)
+		return context
+
 
 class PathogenListForm(ModelForm):
 	"""
@@ -103,7 +107,6 @@ class PathogenDetail(DetailView):
 
 class PathogenEditView(TemplateView):
 	template_name = 'pathogenSite/intro.html'
-	pass
 
 
 class CLCSampleUploadForm(ModelForm):

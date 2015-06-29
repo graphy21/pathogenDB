@@ -26,6 +26,7 @@ CUTOFF_GAP = 0  # diff between hit1_sim, hit2_sim
 PATH_DATA = '/data/home/graphy21/pipeline/pathogenPipeline/data/taxonomy'
 MICROBIOME_CLASSIFICATION_FILE = os.path.join(PATH_DATA,\
 		'taxfulltree.txt')
+ACC2NAME_FILE = os.path.join(PATH_DATA, acc2name.tsv)
 PATHOGEN_ID = {
 		'0': 'NA',
 		'1': 'Not Pathogen',
@@ -246,44 +247,59 @@ class MicrobiomeClassificationTree:
 		return self.nodes_list[name]
 
 
+class AccNameConverter:
+	def __init__(self):
+		self.acc2name = {}
+		self.name2acc = {}
+		self.populate_acc2name()
+		self.populate_name2acc()
+	
+	def populate_acc2name():
+		with open(ACC2NAME_FILE) as f:
+			line = f.readline()
+			while line:
+				sp = line.strip().split('\t')
+				self.acc2name[sp[0]] = sp[1]
+				line = f.readline()
+
+	def populate_name2acc():
+		for key,value for self.acc2name.items():
+			self.name2acc[value] = key
+
+	def get_name(self, acc):
+		return self.acc2name.get(acc)
+		
+	def get_acc(self, name):
+		return self.name2acc.get(name)
+
+
 class Reporter:
+	"""
+	The name in "taxonomyfulltree.txt" is species name standard. 
+	"""
 	def __init__(self, clc_file):
 		self.clc_file = clc_file
 		self.cp = CLCparser(self.clc_file)
 		self.sp = MySQLdbParser(PATHOGEN_DB_HOST, USER, PASSWORD, 'ssu_prok')
 		self.pp = MySQLdbParser(PATHOGEN_DB_HOST, USER, PASSWORD, 'pathogen')
 		self.mc = MicrobiomeClassificationTree(MICROBIOME_CLASSIFICATION_FILE)
+		self.converter = AccNameConverter()
 
 		self.assigned_node = []
 
-		self.clc_total_read_count = 0
+		self.clc_total_read_count = self.cp.get_row_count('raw_count')
 		self.micro_dist = {}
-		self.tax_group = {}
-		self.tax_group_info = {}
-		self.processing_log = {}
+		self.pathogen_info = {}
+		self.tax_group = {} # {'species1': 'representative_name'}
+		self.tax_group_info = {} # {'representative_name': 'species1, species2'}
+		self.log = {}
 
-		self.populate_microbiome_distribution()
 		self.populate_tax_group()
-		#self.populate_pathogen()
+		self.populate_pathogen()
 	
-	def populate_microbiome_distribution(self):
-		"""
-		populates "clc_total_read_count", "micro_dist" variable
-		"""
-		records = self.cp.get_record('profile_mc')
-		for record in records:
-			uid, count = record
-			name = self.mc.get_name(uid)
-			rank = self.mc.get_rank(name)
-			try:
-				self.micro_dist[rank][name] = count
-			except:
-				self.micro_dist[rank] = {name: count}
-		self.clc_total_read_count = self.cp.get_row_count('raw_read')
-
 	def populate_tax_group(self):
 		"""
-		populate "tax_group", "tax_group_info"
+		populate "tax_group", "tax_group_info" variables.
 		"""
 		tax_groups = self.sp.get_record('tax_group')
 		for tax_group in tax_groups:
@@ -294,10 +310,8 @@ class Reporter:
 				self.tax_group[comp] = representative
 
 	def populate_pathogen(self):
-		pass
 		log_assign_count = 0
 		log_confirmed = 0
-		log_having_name = 0
 		log_pathogen = 0
 
 		records = self.cp.get_record('assign')
@@ -319,84 +333,45 @@ class Reporter:
 					((hit1_sim - hit2_sim) > CUTOFF_GAP)):
 				continue
 			log_confirmed += read_count
-			# get name
-			name_record = self.sp.get_record_with_where('seq', 'acc', acc)
-			if (not name_record) or (not name_record[0][5]):
-				continue
-			log_having_name += read_count
-			name = name_record[0][5]
 			# check tax group
-			group_name = self.tax_group.get(name)
+			name = self.converter.get_name(acc)
+			rep_name = self.tax_group.get(name)
 			is_group = True
-			if not group_name:
-				group_name = name
+			if not rep_name:
+				rep_name = name
 				is_group = False
 			# check pathogen
-			pathogen_record = self.pp.get_record_with_where('nomen', 'name', 
-					group_name)
+			pathogen_record = self.pp.get_record_with_where('nomen_with_acc', 
+					'name', rep_name)
 			if not pathogen_record:
 				continue
 			log_pathogen += read_count
 			# make data
 			informations = {
 				'is_group': is_group,
-				'species': pathogen_record[1],
-				'basonym': pathogen_record[8],
-				'taxonomy_group': tax_group_info_all.get(group_name),
-				'pathogen_human': pathogen_record[24],
-				'pathogen_animal': pathogen_record[25],
-				'pathogen_plant': pathogen_record[26],
-				'pathogen_disease_kor': pathogen_record[31],
-				'pathogen_disease': pathogen_record[32],
-				'pathogen_route_kor': pathogen_record[33],
-				'pathogen_route': pathogen_record[34],
-				'pathogen_symptom_kor': pathogen_record[35],
-				'pathogen_symptom': pathogen_record[36],
-				'pathogen_prognosis_kor': pathogen_record[37],
-				'pathogen_prognosis': pathogen_record[38],
-				'pathogen_treatment_kor': pathogen_record[39],
-				'pathogen_treatment': pathogen_record[40],
+				'species': name,
+				'basonym': pathogen_record[9],
+				'taxonomy_group': self.tax_group_info.get(rep_name),
+				'pathogen_human': pathogen_record[25],
+				'pathogen_animal': pathogen_record[26],
+				'pathogen_plant': pathogen_record[27],
+				'pathogen_disease_kor': pathogen_record[32],
+				'pathogen_disease': pathogen_record[33],
+				'pathogen_route_kor': pathogen_record[34],
+				'pathogen_route': pathogen_record[35],
+				'pathogen_symptom_kor': pathogen_record[36],
+				'pathogen_symptom': pathogen_record[37],
+				'pathogen_prognosis_kor': pathogen_record[38],
+				'pathogen_prognosis': pathogen_record[39],
+				'pathogen_treatment_kor': pathogen_record[40],
+				'pathogen_treatment': pathogen_record[41],
 				'pathogen_link': "http://en.wikipedia.org/", #pathogen_record[]
 				}
-			try:
-				pathogen_count_human[informations['pathogen_human']][nomen]\
-						+= read_count
-			except:
-				try:
-					pathogen_count_human[informations['pathogen_human']][nomen]\
-							= read_count
-				except:
-					pathogen_count_human[informations['pathogen_human']] =\
-							{nomen: read_count}
-			try:
-				pathogen_count_animal[informations['pathogen_animal']][nomen]\
-						+= read_count
-			except:
-				try:
-					pathogen_count_animal[informations['pathogen_animal']]\
-							[nomen] = read_count
-				except:
-					pathogen_count_animal[informations['pathogen_animal']] =\
-							{nomen: read_count}
-			try:
-				pathogen_count_plant[informations['pathogen_plant']][nomen]\
-						+= read_count
-			except:
-				try:
-					pathogen_count_plant[informations['pathogen_plant']][nomen]\
-							= read_count
-				except:
-					pathogen_count_plant[informations['pathogen_plant']] =\
-							{nomen: read_count}
-			pathogen_info[nomen] = informations
+			self.pathogen_info[rep_name] = informations
 
-		print 'RAW_READ COUNT  :: ', total_read_count
-		print 'ASSIGN_COUNT    :: ', check_assign_count
-		print 'FILTERED COUNT (confirmed)          :: ', check_confirmed
-		print 'FILTERED COUNT (pathogen_record)    :: ', check_pathogen_record
-		print 'FILTERED COUNT (ssu_prok->pathogen) :: ', check_sp2pp
-		print 'PASSED COUNT    :: ', check_pathogen
-
+		self.log = {'log_assign_count': log_assign_count, 
+				'log_confirmed': log_confirmed,
+				'log_pathogen': log_pathogen,}
 
 	def get_clc_file(self):
 		return self.clc_file
