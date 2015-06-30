@@ -1,15 +1,9 @@
-"""
-This script parses CLC community analysis result file to add pathogen 
-information and makes MS office result file.
-"""
 import os
+import json
 import sys
 import sqlite3
 import MySQLdb
 from collections import OrderedDict
-
-#from DocxMaker import DocxMaker
-#from PlotMaker import piePlot
 
 PATHOGEN_DB_HOST = "147.46.65.202"
 USER = "chunlab"
@@ -244,7 +238,7 @@ class MicrobiomeClassificationTree:
 		return self.nodes_index[name]
 
 	def get_node_by_id(self, id):
-		return self.nodes_list[name]
+		return self.nodes_list[id]
 
 
 class AccNameConverter:
@@ -254,7 +248,7 @@ class AccNameConverter:
 		self.populate_acc2name()
 		self.populate_name2acc()
 	
-	def populate_acc2name():
+	def populate_acc2name(self):
 		with open(ACC2NAME_FILE) as f:
 			line = f.readline()
 			while line:
@@ -262,7 +256,7 @@ class AccNameConverter:
 				self.acc2name[sp[0]] = sp[1]
 				line = f.readline()
 
-	def populate_name2acc():
+	def populate_name2acc(self):
 		for key,value in self.acc2name.items():
 			self.name2acc[value] = key
 
@@ -287,7 +281,7 @@ class Reporter:
 
 		self.assigned_node = []
 
-		self.clc_total_read_count = self.cp.get_row_count('raw_count')
+		self.clc_total_read_count = self.cp.get_row_count('raw_read')
 		self.micro_dist = {}
 		self.pathogen_info = {}
 		self.tax_group = {} # {'species1': 'representative_name'}
@@ -295,7 +289,8 @@ class Reporter:
 		self.log = {}
 
 		self.populate_tax_group()
-		self.populate_pathogen()
+		self.populate_pathogen_by_profile_mc()
+		#self.populate_pathogen_by_assign()
 	
 	def populate_tax_group(self):
 		"""
@@ -309,7 +304,70 @@ class Reporter:
 			for comp in species:
 				self.tax_group[comp] = representative
 
-	def populate_pathogen(self):
+	def populate_pathogen_by_profile_mc(self):
+		log_pathogen = 0
+		log_species = 0
+		log_filter = 0
+		records = self.cp.get_record('profile_mc')
+		for record in records: 
+			uid, count = record
+			node = self.mc.get_node_by_id(uid)
+			name = node.name
+			rank = node.rank
+
+			try:
+				self.micro_dist[rank][name] = count
+			except KeyError:
+				self.micro_dist[rank] = {name : count}
+			# check species
+			if rank != 'species':
+				continue
+			log_species += count
+			# check minimum count
+			if count < 2:
+				continue
+			log_filter += count
+			# check tax group
+			rep_name = name
+			is_group = False
+			if name.strip().split()[-1] == 'group':
+				is_group = True
+				rep_name = ' '.join(name.strip().split()[:-1])
+			# get_pathogen_info
+			pathogen_record = self.pp.get_record_with_where('nomen_with_acc', 
+					'name', rep_name)
+			if not pathogen_record:
+				continue
+			log_pathogen += count
+			pathogen_record = pathogen_record[0]
+			# make data
+			informations = {
+				'is_group': is_group,
+				'species': name,
+				'basonym': pathogen_record[9],
+				'taxonomy_group': self.tax_group_info.get(rep_name),
+				'pathogen_human': pathogen_record[25],
+				'pathogen_animal': pathogen_record[26],
+				'pathogen_plant': pathogen_record[27],
+				'pathogen_disease_kor': pathogen_record[32],
+				'pathogen_disease': pathogen_record[33],
+				'pathogen_route_kor': pathogen_record[34],
+				'pathogen_route': pathogen_record[35],
+				'pathogen_symptom_kor': pathogen_record[36],
+				'pathogen_symptom': pathogen_record[37],
+				'pathogen_prognosis_kor': pathogen_record[38],
+				'pathogen_prognosis': pathogen_record[39],
+				'pathogen_treatment_kor': pathogen_record[40],
+				'pathogen_treatment': pathogen_record[41],
+				'pathogen_link': "http://en.wikipedia.org/", #pathogen_record[]
+				}
+			self.pathogen_info[name] = informations
+			print 'pathogen', name, count
+		
+		self.log = {'log_pathogen': log_pathogen, 'log_species': log_species,
+				'log_filter': log_filter}
+
+	def populate_pathogen_by_assign(self):
 		log_assign_count = 0
 		log_confirmed = 0
 		log_pathogen = 0
@@ -322,17 +380,17 @@ class Reporter:
 			hit2_sim = record[8]
 			sequence_uid = record[0]
 			# get read_count
-			read_count = 1
+			count = 1
 			if sequence_uid < 0:
 				contig_uid = -(sequence_uid)
-				read_count = self.cp.get_field_with_where('contig', 
+				count = self.cp.get_field_with_where('contig', 
 						'read_count', 'contig_uid', contig_uid)[0][0]
-			log_assign_count += read_count
+			log_assign_count += count
 			# check confirmed
 			if not ((hit1_sim >= CUTOFF_HIT1) and\
 					((hit1_sim - hit2_sim) > CUTOFF_GAP)):
 				continue
-			log_confirmed += read_count
+			log_confirmed += count
 			# check tax group
 			name = self.converter.get_name(acc)
 			rep_name = self.tax_group.get(name)
@@ -345,7 +403,8 @@ class Reporter:
 					'name', rep_name)
 			if not pathogen_record:
 				continue
-			log_pathogen += read_count
+			pathogen_record = pathogen_record[0]
+			log_pathogen += count
 			# make data
 			informations = {
 				'is_group': is_group,
@@ -376,304 +435,42 @@ class Reporter:
 	def get_clc_file(self):
 		return self.clc_file
 
+	def get_log(self):
+		return self.log
 
-def make_pathogen_portion_data(pathogen_count):
-	portion_data = {}
-	for key in pathogen_count:
-		count = 0
-		for nomen in pathogen_count[key]:
-			count += pathogen_count[key][nomen]
-		portion_data[PATHOGEN_ID[key]] = count
-	return portion_data
-	
+	def change_format(data, format):
+		if format == 'json':
+			return json.dumps(data)
 
+	def get_total_summary(self, format='json', from_rank='genus', 
+			end_rank='species'):
+		total_summary = [
+				[{"label":"From", "type":"string"},
+				{"label":"to", "type":"string"},
+				{"label":"read count", "type":"number"}]
+			]
+		pass
 
-def make_pathogen_list_data(pathogen_data, total_count, organism):
-	pathogen_list_header =\
-			[['Pathogen Name', 'Read Count', 'Percentage', 'Pathogen']]
-	pathogen_list = []
-	for i in ['3', '4']:
-		data = pathogen_data.get(i)
-		pathogen = PATHOGEN_ID[i]
-		if data:
-			for name in data:
-				read_count = data[name]
-				percent = float(read_count)/total_count*100
-				row = [name, str(read_count), '{:.1f}%'.format(percent),\
-						pathogen]
-				pathogen_list.append(row)
-	pathogen_list.sort(key=lambda x: -int(x[1]))
-	pathogen_list = pathogen_list_header + pathogen_list
-	return pathogen_list
+		
+		return change_format(total_summary, format)
 
+	def get_micro_dist(self, format='json'):
+		pass
 
-def extract_pathogen_list(*args):
-	pathogen_list = []
-	for pathogen_list_organism in args:
-		if len(pathogen_list_organism) > 1:
-			for i in range(1, len(pathogen_list_organism)):
-				pathogen_list.append(pathogen_list_organism[i][0])
-	return pathogen_list
-
-
-def make_pathogen_table_data(pathogen_info):
-	species = pathogen_info['species'] if pathogen_info['species'] else ''
-	if pathogen_info['is_group'] and species:
-		species = '[GROUP] ' + species
-	basonym = pathogen_info['basonym'].replace('|',', ') if\
-			pathogen_info['basonym'] else ''
-	taxonomy_group = pathogen_info['taxonomy_group'] if\
-			pathogen_info['taxonomy_group'] else ''
-	pathogen_human = PATHOGEN_ID[pathogen_info['pathogen_human']]
-	pathogen_animal = PATHOGEN_ID[pathogen_info['pathogen_animal']]
-	pathogen_plant = PATHOGEN_ID[pathogen_info['pathogen_plant']]
-	table_data = [
-			['Species', species],
-			['Basonym', basonym],
-			['Taxonomy Group', taxonomy_group],
-			['Pathogen Human', pathogen_human],
-			['Pathogen Animal', pathogen_animal],
-			['Pathogen Plant', pathogen_plant],
-	]
-	return table_data
+	def get_pathogen_info(self, format='json'):
+		pass
 
 
 
 
-def main(clc_file, output_file):
-	"""
-	"""
-	micro_dist_genus = {}
-	micro_dist_species = {}
-	total_read_count = 0
-	pathogen_info = {}
-	tax_group_info = {}
-	tax_group_info_all = {}
-	pathogen_count_human = {} # {1: {'nomen':'read_count'}, 2: .., 3:.., 4:..}
-	pathogen_count_animal = {}
-	pathogen_count_plant = {}
-	run_count = 1
 
-	## read count check variables
-	check_cp2sp = 0
-	check_sp2pp = 0
-	check_pathogen = 0
-	check_confirmed = 0
-	check_assign_count = 0 ## should be removed
-
-	## make necessary objects
-	cp = CLCparser(clc_file)
-	pp = MySQLdbParser(PATHOGEN_DB_HOST, USER, PASSWORD, 'pathogen')
-	sp = MySQLdbParser(PATHOGEN_DB_HOST, USER, PASSWORD, 'ssu_prok')
-	mc = MicrobiomeClassificationTree(MICROBIOME_CLASSIFICATION_FILE)
-	dm = DocxMaker(DOCX_TEMPLATE, output_file)
-
-	## get tax_group information
-	tax_groups = sp.get_record('tax_group')
-	for tax_group in tax_groups:
-		representative = tax_group[1]
-		species = tax_group[2].split('|')
-		tax_group_info_all[representative] = ', '.join(species)
-		for comp in species:
-			tax_group_info[comp] = representative
-
-	## total microbiome distribution
-	records = cp.get_record('profile_mc')
-	for record in records:
-		uid, count = record; uid = str(uid)
-		rank = mc.get_rank(uid) 
-		if rank == RANK['genus']:
-			micro_dist_genus[mc.get_name(uid)] = count
-		elif rank == RANK['species']:
-			micro_dist_species[mc.get_name(uid)] = count
-	total_read_count = cp.get_row_count('raw_read')
-
-	## get pathogen information
-	records = cp.get_record('assign')
-	for record in records:
-		confirmed = None 
-		hit1_sim = record[5]
-		hit2_sim = record[8]
-		sequence_uid = record[0]
-		# get read_count
-		read_count = 1
-		if sequence_uid < 0:
-			contig_uid = -(sequence_uid)
-			read_count = cp.get_field_with_where('contig', 'read_count', 
-					'contig_uid', contig_uid)[0][0]
-		check_assign_count += read_count ## should be removed
-		# get confirmed
-		if (hit1_sim >= CUTOFF_HIT1) and ((hit1_sim - hit2_sim) > CUTOFF_GAP):
-				confirmed = True
-		else:
-			check_confirmed += read_count
-			continue
-		# get nomen
-		hit1_acc = record[4]
-		nomen_record = sp.get_record_with_where('seq', 'acc', hit1_acc)
-		if (not nomen_record) or (not nomen_record[0][5]):
-			check_cp2sp += read_count
-		# get pathogen information from pathogen DB
-		if nomen_record and nomen_record[0][5]: # check clc to ssu_prok.seq
-			nomen = nomen_record[0][5]
-			is_group = False
-			if tax_group_info.get(nomen): # change name to tax_group
-				nomen = tax_group_info.get(nomen)
-				is_group = True
-			pathogen_record = pp.get_record_with_where('nomen', 'name', nomen)
-			if not pathogen_record:
-				check_sp2pp += read_count
-			if pathogen_record: # check ssu_prok.seq.name to pathogen.nomen.name
-				pathogen_record = pathogen_record[0]
-				check_pathogen += read_count
-			else:
-				continue
-			informations = {
-				'is_group': is_group,
-				'species': pathogen_record[1],
-				'basonym': pathogen_record[8],
-				'taxonomy_group': tax_group_info_all.get(nomen),
-				'pathogen_human': pathogen_record[24],
-				'pathogen_animal': pathogen_record[25],
-				'pathogen_plant': pathogen_record[26],
-				'pathogen_disease_kor': pathogen_record[31],
-				'pathogen_disease': pathogen_record[32],
-				'pathogen_route_kor': pathogen_record[33],
-				'pathogen_route': pathogen_record[34],
-				'pathogen_symptom_kor': pathogen_record[35],
-				'pathogen_symptom': pathogen_record[36],
-				'pathogen_prognosis_kor': pathogen_record[37],
-				'pathogen_prognosis': pathogen_record[38],
-				'pathogen_treatment_kor': pathogen_record[39],
-				'pathogen_treatment': pathogen_record[40],
-				'pathogen_link': "http://en.wikipedia.org/", #pathogen_record[]
-			}
-			try:
-				pathogen_count_human[informations['pathogen_human']][nomen]\
-						+= read_count
-			except:
-				try:
-					pathogen_count_human[informations['pathogen_human']][nomen]\
-							= read_count
-				except:
-					pathogen_count_human[informations['pathogen_human']] =\
-							{nomen: read_count}
-			try:
-				pathogen_count_animal[informations['pathogen_animal']][nomen]\
-						+= read_count
-			except:
-				try:
-					pathogen_count_animal[informations['pathogen_animal']]\
-							[nomen] = read_count
-				except:
-					pathogen_count_animal[informations['pathogen_animal']] =\
-							{nomen: read_count}
-			try:
-				pathogen_count_plant[informations['pathogen_plant']][nomen]\
-						+= read_count
-			except:
-				try:
-					pathogen_count_plant[informations['pathogen_plant']][nomen]\
-							= read_count
-				except:
-					pathogen_count_plant[informations['pathogen_plant']] =\
-							{nomen: read_count}
-			pathogen_info[nomen] = informations
-
-	print 'RAW_READ COUNT  :: ', total_read_count
-	print 'ASSIGN_COUNT    :: ', check_assign_count
-	print 'FILTERED COUNT (confirmed)          :: ', check_confirmed
-	print 'FILTERED COUNT (clc->ssu_prok)      :: ', check_cp2sp
-	print 'FILTERED COUNT (ssu_prok->pathogen) :: ', check_sp2pp
-	print 'PASSED COUNT    :: ', check_pathogen
-	#print 'human', pathogen_count_human, pathogen_count_human.keys()
-	#print 'animal', pathogen_count_animal, pathogen_count_animal.keys()
-	#print 'plant', pathogen_count_plant, pathogen_count_plant.keys()
-
-	## make report
-	# title & sample information
-	dm.add_heading('Pathogen Detection Report')
-	dm.add_paragraph('Sample Name :  {0}\n\nSource :       {1}\n\n'\
-			'Date :         {2}'.format('sample','source','date'))
-	# total microbiome distribution
-	dm.add_heading('Total Microbiome Distribution (genus)', level=1)
-	imgdata = piePlot(micro_dist_genus, total_read_count, .03)
-	dm.add_picture(imgdata)
-	dm.add_heading('Total Microbiome Distribution (species)', level=1)
-	imgdata = piePlot(micro_dist_species, total_read_count, .03,)
-	dm.add_picture(imgdata)
-	# pathogen portion
-	portion_data = make_pathogen_portion_data(pathogen_count_human)
-	dm.add_heading('Pathogen Portion (human)', level=1)
-	imgdata = piePlot(portion_data)
-	dm.add_picture(imgdata)
-	portion_data = make_pathogen_portion_data(pathogen_count_animal)
-	dm.add_heading('Pathogen Portion (animal)', level=1)
-	imgdata = piePlot(portion_data)
-	dm.add_picture(imgdata)
-	portion_data = make_pathogen_portion_data(pathogen_count_plant)
-	dm.add_heading('Pathogen Portion (plant)', level=1)
-	imgdata = piePlot(portion_data)
-	dm.add_picture(imgdata)
-	# pathogen list
-	pathogen_list_data_human = make_pathogen_list_data(pathogen_count_human,\
-			total_read_count, 'Human')
-	dm.add_heading('Pathogen List (Human)', level=1)
-	dm.add_pathogen_table(pathogen_list_data_human, 'ColorfulList-Accent1')
-	pathogen_list_data_animal = make_pathogen_list_data(pathogen_count_animal,\
-			total_read_count, 'Animal')
-	dm.add_heading('Pathogen List (Animal)', level=1)
-	dm.add_pathogen_table(pathogen_list_data_animal, 'ColorfulList-Accent1')
-	pathogen_list_data_plant = make_pathogen_list_data(pathogen_count_plant,\
-			total_read_count, 'Plant')
-	dm.add_heading('Pathogen List (Plant)', level=1)
-	dm.add_pathogen_table(pathogen_list_data_plant, 'ColorfulList-Accent1')	
-	# pathogen distribution
-	#dm.add_heading('Pathogen Distribution', level=1)
-
-	# pathogen species information
-	dm.add_heading('Pathogen Species information', level=1)
-	pathogen_list = extract_pathogen_list(pathogen_list_data_human, 
-			pathogen_list_data_animal, pathogen_list_data_plant)
-	for pathogen in pathogen_list:
-		pathogen_table_data = make_pathogen_table_data(pathogen_info[pathogen])
-		dm.add_species_table(pathogen_table_data, 'ColorfulList-Accent6')
-		dm.add_heading('Pathogen Disease', level=3)
-		dm.add_paragraph(pathogen_info[pathogen]['pathogen_disease'],
-				check_italic=True)
-		dm.add_paragraph(pathogen_info[pathogen]['pathogen_disease_kor'],
-				check_italic=True)
-		dm.add_heading('Pathogen Route', level=3)
-		dm.add_paragraph(pathogen_info[pathogen]['pathogen_route'],
-				check_italic=True)
-		dm.add_paragraph(pathogen_info[pathogen]['pathogen_route_kor'],
-				check_italic=True)
-		dm.add_heading('Pathogen Symptom', level=3)
-		dm.add_paragraph(pathogen_info[pathogen]['pathogen_symptom'],
-				check_italic=True)
-		dm.add_paragraph(pathogen_info[pathogen]['pathogen_symptom_kor'],
-				check_italic=True)
-		dm.add_heading('Pathogen Prognosis', level=3)
-		dm.add_paragraph(pathogen_info[pathogen]['pathogen_prognosis'],
-				check_italic=True)
-		dm.add_paragraph(pathogen_info[pathogen]['pathogen_prognosis_kor'],
-				check_italic=True)
-		dm.add_heading('Pathogen Treatment', level=3)
-		dm.add_paragraph(pathogen_info[pathogen]['pathogen_treatment'],
-				check_italic=True)
-		dm.add_paragraph(pathogen_info[pathogen]['pathogen_treatment_kor'],
-				check_italic=True)
-
-
-
+def main(clc_file, output_prefix):
+	reporter = Reporter(clc_file)
+	print '1111', reporter.get_log()
 
 
 
 if __name__ == '__main__':
 	if len(sys.argv) != 3:
-		sys.exit('python this.py [clc file] [output file]\n\n')
-
-	clc_file = sys.argv[1]
-	output_file = sys.argv[2]
-
-	main(clc_file, output_file)
+		sys.exit('python this.py [clc_file] [output_prefix]\n')
+	main(sys.argv[1], sys.argv[2])

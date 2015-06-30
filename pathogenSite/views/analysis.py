@@ -1,3 +1,5 @@
+import json
+
 from django import forms
 from django.http import HttpResponse
 from django.core.urlresolvers import reverse_lazy
@@ -16,7 +18,10 @@ class PathogenAnalysis(TemplateView):
 		if len(clc_files) > 1:
 			pass
 		clc_file = clc_files[0]
+		print 'aaa\n\n', json.loads(clc_file)
+
 		reporter = Reporter(clc_file)
+		print reporter.get_log()
 		context = self.get_context_data()
 
 		# Read Count Assignment Flow
