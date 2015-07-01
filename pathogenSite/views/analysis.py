@@ -14,23 +14,29 @@ class PathogenAnalysis(TemplateView):
 	template_name = 'pathogenSite/report/report.html'
 
 	def post(self, request, *args, **kwargs):
-		clc_files = request.POST.getlist('sample')
-		if len(clc_files) > 1:
-			pass
-		clc_file = clc_files[0]
-		print 'aaa\n\n', json.loads(clc_file)
-
-		reporter = Reporter(clc_file)
-		print reporter.get_log()
 		context = self.get_context_data()
+		clc_files = request.POST.getlist('sample')
 
+		total_micro_dist = []
+		for clc_file in clc_files:
+			clc_file = json.loads(clc_file)
+			file_path = clc_file['path']
+			sample_name = clc_file['name']
+
+			reporter = Reporter(file_path)
+			reporter.check_rank_count()
+			micro_dist = reporter.get_micro_dist()
+			for comp in micro_dist:
+				comp['sample'] = sample_name
+				total_micro_dist.append(comp)
+	
 		# Read Count Assignment Flow
 		# Possible Pathogens & Diseases
 		# Total Microbiome Distribution 
 		# Pathogen Distribution
 		# Pathogen Information
-		
 		context['well'] = reporter.get_clc_file()
+		context['data'] = json.dumps(total_micro_dist)
 		return super(PathogenAnalysis, self).render_to_response(context)
 
 	def get_context_data(self, **kwargs): # this will be called 'GET' request

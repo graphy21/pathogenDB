@@ -47,6 +47,9 @@ RANK = {
 		'strain' : '14',
 }
 RANK_REV = {value:key for key,value in RANK.items() if key != 'root'}
+RANK_ORDER = ['domain', 'kingdom', 'subkingdom', 'phylum', 'subphylum', 
+		'class', 'subclass', 'order', 'suborder', 'family', 'subfamily', 
+		'genus', 'species']
 
 
 
@@ -178,6 +181,22 @@ class TaxonomyNode:
 		self.children.append(child_node)
 
 
+def get_parent_info(node, end_rank, data={}):
+	rank = node.rank
+	name = node.name
+	if (end_rank not in RANK_ORDER):
+		raise ValueError('end_rank is not RANK')
+	if int(RANK[rank]) < int(RANK[end_rank]):
+		raise ValueError("node's rank is upper than end_rank")
+	data[rank] = node.name
+	if node.rank == end_rank:
+		return data
+	get_parent_info(node.parent_node, end_rank, data)
+	return data
+	
+
+
+
 class TaxonomyTree:
 	def __init__(self, file_):
 		self.file_ = file_
@@ -282,7 +301,7 @@ class Reporter:
 		self.assigned_node = []
 
 		self.clc_total_read_count = self.cp.get_row_count('raw_read')
-		self.micro_dist = {}
+		self.micro_dist = {} # {'genus': {'name1':count}, 'species':..}
 		self.pathogen_info = {}
 		self.tax_group = {} # {'species1': 'representative_name'}
 		self.tax_group_info = {} # {'representative_name': 'species1, species2'}
@@ -438,29 +457,44 @@ class Reporter:
 	def get_log(self):
 		return self.log
 
-	def change_format(data, format):
+	def change_format(self, data, format):
 		if format == 'json':
 			return json.dumps(data)
+		elif format == 'python':
+			return data
 
-	def get_total_summary(self, format='json', from_rank='genus', 
-			end_rank='species'):
+	def get_total_summary(self, format='python', from_rank='species', 
+			end_rank='genus'):
 		total_summary = [
 				[{"label":"From", "type":"string"},
 				{"label":"to", "type":"string"},
 				{"label":"read count", "type":"number"}]
 			]
 		pass
+		return self.change_format(total_summary, format)
 
-		
-		return change_format(total_summary, format)
+	def get_micro_dist(self, from_rank='species', end_rank='genus', 
+			format='python'):
+		total_data = []
+		all_kinds = self.micro_dist[from_rank]
+		for name in all_kinds:
+			data = {}
+			count = all_kinds[name]
+			node = self.mc.get_node_by_name(name)
+			data = get_parent_info(node, end_rank, data)
+			data['count'] = count
+			total_data.append(data)
+		return self.change_format(total_data, format)
 
-	def get_micro_dist(self, format='json'):
+	def get_pathogen_info(self, format='python'):
 		pass
 
-	def get_pathogen_info(self, format='json'):
-		pass
-
-
+	def check_rank_count(self):
+		for rank in self.micro_dist:
+			total_kind = len(self.micro_dist[rank].keys())
+			total_count = sum([self.micro_dist[rank][k] for k in\
+					self.micro_dist[rank]])
+			print rank, total_kind, total_count
 
 
 

@@ -1,418 +1,137 @@
-{% extends "pathogenSite/base.html" %}
+{% load i18n staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<!--
+	jquery, bootstrap, jquery-ui, d3, crossfilter, dc
+	-->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dc/1.7.3/dc.min.css">
+	<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dc/2.0.0-beta.11/dc.min.css">-->
 
 
-{% block title %}Report Test{% endblock %}
 
+</head>
+<body>
+<div class="container">
+	<div class="row" style="margin-top:20px;">
+	</div>
+	<!-- control board -->
+	<div class="row">
+		<hr>
+		<div class="btn-group">
+			<button type="button" class="btn btn-info dropdown-toggle" id="sort_samles" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				sort samples
+			</button>
+			<ul id="sort_samples" class="dropdown-menu" aria-labelledby="sort_samples">
+				<li><a href="javascript:void(0);" id="by_time">by time</a></li>
+				<li><a href="javascript:void(0);" id="on_manual">on manual</a></li>
+			</ul>
+		</div>
+		<div id="area_for_manual">
+		</div>	
+	</div>
 
-{% block content %}
-<div>
-	<h2>{{ well }}</h2>
-</div>
-<div class="div1 row">
-	<hr>
-	<h3>Data Summary</h3>
-	<h4>Read Count Assignment Flow</h4>
-	<div id="div1_sankey1"></div>
-	<br>
-	<h4>Detected Pathogens & Possible Diseases</h4>
-	<div id="div1_bubble1" class="col-sm-offset-2"></div>
-</div>
+	<!-- total samples stats -->
+	<div class="row">
+		<hr>
+		<div id="sample-pie-chart">
+			<strong>plot1</strong>
+			<a class="reset" style="display:none;" href="javascript:pieChart.filterAll();dc.redrawAll();">reset</a>
+			<div class="clearfix">
+			</div>	
+		</div>
+		<div id="sample-pie-chart-test">
+			<strong>plot2</strong>
+			<a class="reset" style="display:none;" href="javascript:pieChartTest.filterAll();dc.redrawAll();">reset</a>
+			<div class="clearfix">
+			</div>	
+		</div>
+		<div id="sample-stack-chart"></div>
+	</div>
 
-<div class="div2 row">
-	<hr>
-	<h3>Data Details</h3>
-	<h4>Total Microbiome Distribution</h4>
-	<div id="div2_table1" class="col-sm-3"></div>
-	<div id="div2_pie1" class="col-sm-4"></div>
-	<div id="div2_pie2" class="col-sm-4"></div>
-</div>
+	<div class="div1 row">
+		<hr>
+		<h3>Data Summary</h3>
+		<h4>Read Count Assignment Flow</h4>
+		<div id="div1_sankey1"></div>
+		<br>
+		<h4>Detected Pathogens & Possible Diseases</h4>
+		<div id="div1_bubble1" class="col-sm-offset-2"></div>
+	</div>
 
-<div class="div3 row">
-	<hr>
-	<h4>Pathogen Distribution</h4>
-	<div id="div3_pie1" class="col-sm-5"></div>
-	<div id="div3_column1" class="col-sm-4"></div>
-</div>
+	<div class="div2 row">
+		<hr>
+		<h3>Data Details</h3>
+		<h4>Total Microbiome Distribution</h4>
+		<div id="div2_table1" class="col-sm-3"></div>
+		<div id="div2_pie1" class="col-sm-4"></div>
+		<div id="div2_pie2" class="col-sm-4"></div>
+	</div>
 
-<div class="div4 row">
-	<hr>
-	<h4>Pathogen Information</h4>
-	<div class="col-sm-4 composition"></div>
-	<div class="col-sm-12">
-		<table class="table">
-			<thead>
-				<tr>
-					<th><Strong>Species</Strong></th>
-					<th><a class="group">[GROUP]</a> <i>Escherichia coli</i></th>
-				</tr>
-			<thead>
-			<tbody>
-				<tr>
-					<td><strong>Basonym</strong></td>
-					<td><i>Bacterium coli commune, Bacillus coli, 
-							Bacterium coli
-					</i></td>
-				</tr>
-				<tr>
-					<td><strong>Taxonomy Group</strong></td>
-					<td><i>Escherichia coli, Shigella flexneri, 
-							Shigella sonnei, Shigella boydii, 
-							Escherichia albertii, Shigella dysenteriae, 
-							Escherichia fergusonii
-					</i></td>
-				</tr>
-			</tbody>
-		</table>
+	<div class="div3 row">
+		<hr>
+		<h4>Pathogen Distribution</h4>
+		<div id="div3_pie1" class="col-sm-5"></div>
+		<div id="div3_column1" class="col-sm-4"></div>
+	</div>
+
+	<div class="div4 row">
+		<hr>
+		<h4>Pathogen Information</h4>
+		<div class="col-sm-4 composition"></div>
+		<div class="col-sm-12">
+			<table class="table">
+				<thead>
+					<tr>
+						<th><Strong>Species</Strong></th>
+						<th><a class="group">[GROUP]</a> <i>Escherichia coli</i></th>
+					</tr>
+				<thead>
+				<tbody>
+					<tr>
+						<td><strong>Basonym</strong></td>
+						<td><i>Bacterium coli commune, Bacillus coli, 
+								Bacterium coli
+						</i></td>
+					</tr>
+					<tr>
+						<td><strong>Taxonomy Group</strong></td>
+						<td><i>Escherichia coli, Shigella flexneri, 
+								Shigella sonnei, Shigella boydii, 
+								Escherichia albertii, Shigella dysenteriae, 
+								Escherichia fergusonii
+						</i></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	</div>
 </div>
-{% endblock %}
 
+	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" charset="utf-8"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.11/crossfilter.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/dc/1.7.3/dc.min.js"></script>
+	<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.0.0-beta.11/dc.js"></script>-->
 
-{% block script %}
-<style>
-@media print and (width: 21cm) and (height: 29.7cm) {
-	@page .print-landscape-a4 {
-	   margin: 3cm;
-	   size: A4 landscape;
-	}
-}
+	<script>
+		var data = {{ data|safe }}
+		$("#sort_samples li a").click(function(){
+			var sortBy = $(this).text();
+			if (sortBy === "by time"){
+				return true;
+			} else if (sortBy === "on manual"){
+				return true;	
+			}
+		});
+	</script>
+	<script src="{% static 'pathogenSite/js/report.js' %}"></script>
 
-.link {
-  stroke: #ccc;
-}  
+</body>
+</html>
 
-h4 {
-  color: grey;
-}
-
-.node {
-  cursor: pointer;
-}
-
-.node:hover {
-  stroke: #000;
-  stroke-width: 1.5px;
-}
-
-.node--leaf {
-  fill: white;
-}
-
-.label {
-  font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
-  text-anchor: middle;
-  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
-}
-
-.label,
-.node--root,
-.node--leaf {
-  pointer-events: none;
-}
-
-</style>
-<script src="https://www.google.com/jsapi"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js">
-</script>
-<script>
-function ColorLuminance(hex, lum) {
-	// validate hex string
-	hex = String(hex).replace(/[^0-9a-f]/gi, '');
-	if (hex.length < 6) {
-		hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
-	}
-	lum = lum || 0;
-
-	// convert to decimal and change luminosity
-	var rgb = "#", c, i;
-	for (i = 0; i < 3; i++) {
-		c = parseInt(hex.substr(i*2,2), 16);
-		c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
-		rgb += ("00"+c).substr(c.length);
-	}
-	return rgb;
-}
-function MakeGradientColors(hex, count){
-	count = count;
-	var diff = 1/count;
-	var colors = [];
-	for (i=0; i < count; i++){
-		colors.push(ColorLuminance(hex, diff*i));
-	};
-	return colors;
-}
-
-// Load the Visualization API and the piechart package.
-google.load('visualization', '1.1', 
-	{'packages':['corechart', 'table', 'sankey']});
-	
-
-//// 1.1 Read Count Assignment Flow
-google.setOnLoadCallback(drawTotalChart);
-function drawTotalChart(){
-	var data = new google.visualization.arrayToDataTable(
-		{{ total_summary|safe }});
-	var colors = ['#a6cee3', '#b2df8a', '#fb9a99', '#fdbf6f', '#cab2d6', 
-		'#ffff99', '#1f78b4', '#33a02c'];
-	var options = {width: 800, height: 450, sankey:{'node': {'colors':colors},
-		'link':{'colorMode':'gradient', 'colors':colors}
-	}};
-	var sankey1 = new google.visualization.Sankey(
-		document.getElementById('div1_sankey1'));
-	sankey1.draw(data, options);	
-};
-
-//// 1.2 Possible Pathogens & Diseases
-drawBubbleChart();
-function drawBubbleChart(){
-	var margin = 30,
-		diameter = 400;
-
-	var color = d3.scale.linear()
-		.domain([-1, 5])
-		.range(["hsl(0,70%,85%)", "hsl(0,85%,55%)"])
-		.interpolate(d3.interpolateHcl);
-
-	var pack = d3.layout.pack()
-		.padding(2)
-		.size([diameter - margin, diameter - margin])
-		.value(function(d) { return d.size; });
-
-	var svg = d3.select("#div1_bubble1").append("svg")
-		.attr("width", diameter)
-		.attr("height", diameter)
-		.append("g")
-		.attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
-	var root = {{ root|safe }};
-
-	var focus = root,
-		nodes = pack.nodes(root),
-		view;
-
-	var circle = svg.selectAll("circle")
-		.data(nodes)
-		.enter().append("circle")
-		.attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
-		.style("fill", function(d) { return d.children ? color(d.depth) : null; })
-		.on("click", function(d) { if (focus !== d)  zoom(d), event.stopPropagation();});
-
-	var text = svg.selectAll("text")
-		.data(nodes)
-		.enter().append("text")
-		.attr("class", "label")
-		.classed("bubble", true)
-		.style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
-		.style("display", function(d) { return d.parent === root ? null : "none"; })
-		.text(function(d) { return d.name; });
-
-	var node = svg.selectAll("circle,text");
-
-	d3.select("#div1_bubble1")
-		.on("click", function() { console.log('2222', event); zoom(root); });
-
-	zoomTo([root.x, root.y, root.r * 2 + margin]);
-
-	function zoom(d) {
-		var focus0 = focus; focus = d;
-
-		var transition = d3.transition()
-			.duration(event.altkey ? 7500 : 750)
-			.tween("zoom", function(d) { var i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
-				return function(t) { zoomTo(i(t)); };
-			});
-
-		transition.selectAll("text.bubble")
-			.filter(function(d) {
-				return d.parent === focus || this.style.display === "inline"; })
-			.style("fill-opacity", function(d) { return d.parent === focus ? 1 : 0; })
-			.each("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
-			.each("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
-	};
-
-	function zoomTo(v) {
-		var k = diameter / v[2]; view = v;
-		node.attr("transform", function(d) {  return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
-		circle.attr("r", function(d) { return d.r * k; });
-	};
-	d3.select(self.frameElement).style("height", diameter + "px");
-};
-
-//color = d3.scale.ordinal()
-//.domain(["Human Pathogen", "Animal Pathogen", "Plant Pathogen"])
-//.range(['#FE1E4D', '#5070FE', '#82FE8C']);
-
-
-//// 2.1 Total Microbiome Distribution
-google.setOnLoadCallback(drawMicrobiomeChart);
-function drawMicrobiomeChart() {
-	// Create the data table.
-	var data = new google.visualization.arrayToDataTable({{ genus|safe }});
-	var view = new google.visualization.DataView(data);
-
-	// Set chart options
-	var options = {{ options|safe }};
-	var species_all = {{ species|safe }};
-
-	// Instantiate and draw our chart, passing in some options.
-	var chart1 = new google.visualization.PieChart(
-		document.getElementById('div2_pie1'));
-	var chart2 = new google.visualization.PieChart(
-		document.getElementById('div2_pie2'));
-	var table1 = new google.visualization.Table(
-		document.getElementById('div2_table1'));
-
-	google.visualization.events.addListener(table1, 'sort', 
-		function(event) {
-			order = data.getSortedRows(
-				[{column: event.column, desc: !event.ascending}]);
-			tablePreToCur = {};
-			tableCurToPre = {};
-			for (i=0; i < order.length; i++){
-				tablePreToCur[order[i]] = i;
-				tableCurToPre[i] = order[i];
-			};
-			data.sort([{column: event.column, desc: !event.ascending}]);
-			chart1.draw(data, options);
-	});
-
-	google.visualization.events.addListener(table1, 'select', function() {
-		selection = table1.getSelection();
-		if (selection.length > 0){
-			if (typeof(tablePreToCur) !== 'undefined'){
-				rowNum = tablePreToCur[selection[0].row];
-			}else{
-				rowNum = selection[0].row;
-			};
-			chart1.setSelection([{'column':null, 'row':rowNum}]);
-			genus = data.getValue(rowNum,0);
-			var species = 
-				new google.visualization.arrayToDataTable(species_all[genus]);
-			var initColor = options['colors'][rowNum];
-			var gradientColors = MakeGradientColors(initColor, 
-				species_all[genus].length);
-			var options_tt = 
-				{'title': 'species('+ genus +')', 'width':400, 'height':300,
-				'colors': gradientColors};
-			chart2.draw(species, options_tt);
-		};
-	});
-	google.visualization.events.addListener(chart1, 'select', function() {
-		selection = chart1.getSelection();
-		if (selection.length > 0){
-			if (typeof(tableCurToPre) !== 'undefined'){
-				rowNum = tableCurToPre[selection[0].row];
-			}else{
-				rowNum = selection[0].row;
-			};
-			table1.setSelection([{'row':rowNum, column:null}]);
-			genus = data.getValue(selection[0].row,0);
-			var species = 
-				new google.visualization.arrayToDataTable(species_all[genus]);
-			var initColor = options['colors'][selection[0].row];
-			var gradientColors = MakeGradientColors(initColor, 
-				species_all[genus].length);
-			var options_tt = 
-				{'title': 'species('+ genus +')', 'width':400, 'height':300,
-				'colors': gradientColors};
-			chart2.draw(species, options_tt);
-		};
-	});
-
-	table1.draw(data);
-	$('#div2_table1 table').addClass('table');
-	chart1.draw(data, options);
-	var genus = data.getValue(0,0);
-	var species = new 
-		google.visualization.arrayToDataTable(species_all[genus]);
-	var initColor = options['colors'][0];
-	var gradientColors = 
-		MakeGradientColors(initColor, species_all[genus].length)
-	var options_tt = {'title': 'species('+ genus +')', 'width':400, 
-		'height':300,'colors': gradientColors};
-	chart2.draw(species, options_tt);
-};
-
-//// 2.2 Pathogen Distribution
-google.setOnLoadCallback(drawPathogenChart);
-function drawPathogenChart(){
-	var dataPie1 = new google.visualization.arrayToDataTable(
-		{{ pathogen_portion|safe }});
-	var pie1 = new google.visualization.PieChart(
-		document.getElementById('div3_pie1'));
-	pie1.draw(dataPie1, {'title':'Pathogen Proportion', 'width':400, 
-		'height':300, 'colors': ['#109618', '#ff9900', '#dc3912'],
-		'slices': {1:{'offset':0.15}, 2:{'offset':0.2}}
-	});
-
-	var dataColumn1 = new google.visualization.arrayToDataTable({{ pathogen_organism|safe }});
-	var column1 = new google.visualization.ColumnChart(
-		document.getElementById('div3_column1'));
-	column1.draw(dataColumn1, {'title':'Pathogens in Organisms', 'width':500, 
-		'height':300, 'colors': ['#dc3912', '#ff9900'], 
-		'legend':{'position':'right'}, 'isStacked':true, 
-	});
-};
-
-//// 2.3 Pathogen Information
-showConnectivity();
-function showConnectivity(){
-$(".group").click(function(){
-	$(".composition").fadeToggle();
-});
-
-var data = {{ group|safe }}
-
-var width = 460,
-    height = 250
-     
-var svg = d3.select(".composition").append("svg")
-    .attr("width", width)
-    .attr("height", height);
-     
-var force = d3.layout.force()
-    .gravity(.05)
-    .distance(100)
-    .charge(-100)
-    .size([width, height]);
-
-force
-  .nodes(data.nodes)
-  .links(data.links)
-  .start();
-     
-var link = svg.selectAll(".link")
-  .data(data.links)
-.enter().append("line")
-  .attr("class", "link");
-     
-var node = svg.selectAll(".node")
-  .data(data.nodes)
-  .enter().append("g")
-  .attr("class", "node")
-  .call(force.drag);
-     
-node.append("image")
-  .attr("xlink:href", "http://icons.iconarchive.com/icons/banzaitokyo/medico/48/bacteria-icon.png")
-  .attr("x", -8)
-  .attr("y", -8)
-  .attr("width", 16)
-  .attr("height", 16);
-     
-node.append("text")
-  .attr("dx", 12)
-  .attr("dy", ".35em")
-  .text(function(d) { return d.name });
-     
-force.on("tick", function() {
-	link.attr("x1", function(d) { return d.source.x; })
-		.attr("y1", function(d) { return d.source.y; })
-		.attr("x2", function(d) { return d.target.x; })
-		.attr("y2", function(d) { return d.target.y; });
-		 
-	node.attr("transform", function(d) { 
-		return "translate(" + d.x + "," + d.y + ")"; });
-});
-};
-$('.composition').hide()
-</script>
-{% endblock %}
