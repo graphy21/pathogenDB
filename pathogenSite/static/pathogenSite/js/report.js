@@ -1,5 +1,20 @@
 /* handle event 
  * */
+function parseDataForDC(preData) {
+    var data = [];
+	for (var k in preData){
+		if (preData.hasOwnProperty(k)){
+			var datum = preData[k];
+			for (var i = 0, max = datum.length; i < max; i += 1){
+				data = data.concat(datum[i]);
+			}
+		}
+	}
+    return data;
+}
+
+var data = parseDataForDC(oriData); // decide location of this variable !!
+
 $('.exp').css('cursor', 'help');
 $('.exp').tooltip({show: {effect:'Fade', duration:10}});
 $('.row').css('margin-top','20px');
@@ -19,6 +34,9 @@ $(document).ready(function(){
 		$('#sortable').children().each(function () {
 			order.push($(this).text());
 		});
+		speciesPerSampleBarChart.x(d3.scale.ordinal().domain(order));
+		lineChart.x(d3.scale.ordinal().domain(order)).renderArea(true);
+		dc.redrawAll();
 	});
 });
 
@@ -39,34 +57,9 @@ var topGenusCount = 5,
 	sampleDim = microbiome.dimension(function (d) {
 		return d.sample;
 	}),
-	sampleDimGroup = sampleDim.group().reduce(
-		function (p, d){
-			p.count += d.count;
-			p.index = d.i;
-			return p;
-		},
-		function (p, d){
-			p.count -= d.count;
-			p.index = d.i;
-			return p;
-		},
-		function (){ return {count: 0, index: 0}; }
-	),
-
-	indexDim = microbiome.dimension(function (d) {
-		return d.i;
+	sampleDimGroup = sampleDim.group().reduceSum( function (d){
+		return d.count;
 	}),
-	indexDimGroup = indexDim.group().reduce(
-		function(p, v){
-			p.count += v.count;
-			return p;
-		},
-		function(p, v){
-			p.count -= v.count;
-			return p;
-		},
-		function(){return {count: 0};}
-	),
 	indexToSample = {},
 
 	genusDim = microbiome.dimension(function (d){
@@ -93,8 +86,8 @@ for (var i = 0, max = top_species.length; i < max; i +=1 ){
 	top_species_name.push(top_species[i].key);
 }
 
-function getIndexDimGroupByType(rank, type) {
-	return indexDim.group().reduceSum( function (d) {
+function getSampleDimGroupByType(rank, type) {
+	return sampleDim.group().reduceSum( function (d) {
 			if (d[rank] === type){
 				return d.count;
 			} else {
@@ -104,12 +97,12 @@ function getIndexDimGroupByType(rank, type) {
 
 for (var i = 0, max = top_species_name.length; i < max; i += 1){
 	var species = top_species_name[i];
-	var value = getIndexDimGroupByType('species', species);
+	var value = getSampleDimGroupByType('species', species);
 	species_per_samples.push( {'key':species, 'value': value} );
 }
 
 species_per_samples.push({'key': 'etc', 'value': 
-	indexDim.group().reduceSum( function (d) {
+	sampleDim.group().reduceSum( function (d) {
 			if (top_species_name.indexOf(d['species']) === -1){
 				return d.count;
 			} else {
@@ -119,7 +112,7 @@ species_per_samples.push({'key': 'etc', 'value':
 
 for (var i=0, max=sampleDimGroup.all().length; i < max; i += 1){
 	var t = sampleDimGroup.all()[i];
-	indexToSample[t.value.index] = t.key;
+	indexToSample[i] = t.key;
 }
 
 /* draw chart 
@@ -129,13 +122,13 @@ samplePieChart
 	.height(200)
 	.radius(90)
 	.innerRadius(20)
-	.dimension(indexDim)
-	.group(indexDimGroup)
+	.dimension(sampleDim)
+	.group(sampleDimGroup)
 	.label(function (d) {
-			return indexToSample[d.data.key];
+			return d.data.key;
 	})
 	.valueAccessor(function(d){
-		return d.value.count;
+		return d.value;
 	});
 
 genusPieChart
@@ -156,7 +149,7 @@ speciesPerSampleBarChart
 	.width(790)
 	.height(300)
 	.margins({top:20, right:20, bottom:30, left:50})
-	.dimension(indexDim)
+	.dimension(sampleDim)
 	.group(species_per_samples[0]['value'], species_per_samples[0]['key'])
 	.valueAccessor(function(p) {
 		return p.value;
@@ -169,6 +162,7 @@ for (var i = 1, max = species_per_samples.length; i < max; i+=1){
 speciesPerSampleBarChart
 	.x(d3.scale.ordinal())
 	.xUnits(dc.units.ordinal)
+	.elasticX(true)
 	.elasticY(true)
 	.centerBar(true)
 	.gap(5)
@@ -182,7 +176,7 @@ lineChart
 	.width(790)
 	.height(300)
 	.margins({top:20, right:20, bottom:30, left:50})
-	.dimension(indexDim)
+	.dimension(sampleDim)
 	.valueAccessor(function(p){
 		return p.value;
 	})
@@ -196,11 +190,8 @@ lineChart
 	.renderHorizontalGridLines(true)
 	.x(d3.scale.ordinal())
 	.xUnits(dc.units.ordinal)
+	.elasticX(true)
 	.elasticY(true);
-
-
-
-
 
 
 dc.renderAll();

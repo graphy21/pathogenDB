@@ -34,12 +34,15 @@
 		<div id="area_for_manual">
 		</div>	
 	</div>
+
 	<div class="row">
 		<div id="sortable">
 		</div>
 	</div>
+
 	<div class="row">
-		<button class="btn btn-success" id="apply-sorting">Apply Sorting</button>
+		<button class="btn btn-success" id="apply-sorting">Apply Sorting
+		</button>
 	</div>
 
 	<!-- total samples stats -->
@@ -64,7 +67,7 @@
 	</div>
 	<div class="row">
 		<div id="sample-stack-chart">
-			<strong class="exp" title="genus explanation">Genus Composition Per Sample</strong>
+			<strong class="exp" title="genus explanation">Species Composition Per Sample</strong>
 			<a class="reset" style="display:none;" href="javascript:genusPerSampleChart.filterAll();dc.redrawAll();">reset</a>
 			<div class="clearfix"></div>
 		</div>
@@ -139,7 +142,7 @@
 	<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.0.0-beta.11/dc.js"></script>-->
 
 	<script>
-		var data = {{ data|safe }}
+		var oriData = {{ data|safe }}
 		$("#sort_samples li a").click(function(){
 			var sortBy = $(this).text();
 			if (sortBy === "by time"){

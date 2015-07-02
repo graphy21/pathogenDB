@@ -14,11 +14,16 @@ class PathogenAnalysis(TemplateView):
 	template_name = 'pathogenSite/report/report.html'
 
 	def post(self, request, *args, **kwargs):
+		"""
+		total_micro_dist = {
+		'sample1': {'sample':, 'genus':, 'species':, 'count':}
+		}
+		"""
 		context = self.get_context_data()
 		clc_files = request.POST.getlist('sample')
 
 		sample_index = 0
-		total_micro_dist = []
+		total_micro_dist = {}
 		for clc_file in clc_files:
 			sample_index += 1
 			clc_file = json.loads(clc_file)
@@ -28,10 +33,10 @@ class PathogenAnalysis(TemplateView):
 			reporter = Reporter(file_path)
 			reporter.check_rank_count()
 			micro_dist = reporter.get_micro_dist()
+			total_micro_dist[sample_name] = []
 			for comp in micro_dist:
 				comp['sample'] = sample_name
-				comp['i'] = sample_index
-				total_micro_dist.append(comp)
+				total_micro_dist[sample_name].append(comp)
 			
 	
 		# Read Count Assignment Flow
