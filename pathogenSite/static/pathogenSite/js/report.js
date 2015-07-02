@@ -22,7 +22,6 @@ $(document).ready(function(){
 	for (var k in indexToSample){
 		if (indexToSample.hasOwnProperty(k)){
 			var v = indexToSample[k];
-			console.log('vvvvvv',v);
 			$('#sortable').append('<div class="btn ui-state-default">'+ 
 				v +'</div>');
 		}
@@ -35,7 +34,7 @@ $(document).ready(function(){
 			order.push($(this).text());
 		});
 		speciesPerSampleBarChart.x(d3.scale.ordinal().domain(order));
-		lineChart.x(d3.scale.ordinal().domain(order)).renderArea(true);
+		lineChart.x(d3.scale.ordinal().domain(order));
 		dc.redrawAll();
 	});
 });
@@ -125,7 +124,8 @@ samplePieChart
 	.dimension(sampleDim)
 	.group(sampleDimGroup)
 	.label(function (d) {
-			return d.data.key;
+		console.log('dddd',d);
+		return d.data.key;
 	})
 	.valueAccessor(function(d){
 		return d.value;
