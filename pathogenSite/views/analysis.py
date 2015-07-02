@@ -17,8 +17,10 @@ class PathogenAnalysis(TemplateView):
 		context = self.get_context_data()
 		clc_files = request.POST.getlist('sample')
 
+		sample_index = 0
 		total_micro_dist = []
 		for clc_file in clc_files:
+			sample_index += 1
 			clc_file = json.loads(clc_file)
 			file_path = clc_file['path']
 			sample_name = clc_file['name']
@@ -28,7 +30,9 @@ class PathogenAnalysis(TemplateView):
 			micro_dist = reporter.get_micro_dist()
 			for comp in micro_dist:
 				comp['sample'] = sample_name
+				comp['i'] = sample_index
 				total_micro_dist.append(comp)
+			
 	
 		# Read Count Assignment Flow
 		# Possible Pathogens & Diseases

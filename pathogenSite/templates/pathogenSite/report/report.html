@@ -8,6 +8,7 @@
 	-->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dc/1.7.3/dc.min.css">
 	<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dc/2.0.0-beta.11/dc.min.css">-->
 
@@ -16,7 +17,7 @@
 </head>
 <body>
 <div class="container">
-	<div class="row" style="margin-top:20px;">
+	<div class="row">
 	</div>
 	<!-- control board -->
 	<div class="row">
@@ -33,23 +34,41 @@
 		<div id="area_for_manual">
 		</div>	
 	</div>
+	<div class="row">
+		<div id="sortable">
+		</div>
+	</div>
+	<div class="row">
+		<button class="btn btn-success" id="apply-sorting">Apply Sorting</button>
+	</div>
 
 	<!-- total samples stats -->
 	<div class="row">
 		<hr>
 		<div id="sample-pie-chart">
-			<strong>plot1</strong>
-			<a class="reset" style="display:none;" href="javascript:pieChart.filterAll();dc.redrawAll();">reset</a>
+			<strong class="exp" title="샘플의 리드 카운트 갯수 비율입니다.">Read Count</strong>
+			<a class="reset" style="display:none;" href="javascript:samplePieChart.filterAll();dc.redrawAll();">reset</a>
 			<div class="clearfix">
 			</div>	
 		</div>
-		<div id="sample-pie-chart-test">
-			<strong>plot2</strong>
-			<a class="reset" style="display:none;" href="javascript:pieChartTest.filterAll();dc.redrawAll();">reset</a>
-			<div class="clearfix">
-			</div>	
+		<div id="genus-pie-chart">
+			<strong class="exp" title="well">Genus Composition</strong>
+			<a class="reset" style="display:none;" href="javascript:genusPieChart.filterAll();dc.redrawAll();">reset</a>
+			<div class="clearfix"></div>
 		</div>
-		<div id="sample-stack-chart"></div>
+		<div id="species-pie-chart">
+			<strong class="exp" title="species explanation">Species Composition</strong>
+			<a class="reset" style="display:none;" href="javascript:speciesPieChart.filterAll();dc.redrawAll();">reset</a>
+			<div class="clearfix"></div>
+		</div>
+	</div>
+	<div class="row">
+		<div id="sample-stack-chart">
+			<strong class="exp" title="genus explanation">Genus Composition Per Sample</strong>
+			<a class="reset" style="display:none;" href="javascript:genusPerSampleChart.filterAll();dc.redrawAll();">reset</a>
+			<div class="clearfix"></div>
+		</div>
+		<div id="sample-line-chart"></div>
 	</div>
 
 	<div class="div1 row">
@@ -113,7 +132,7 @@
 
 	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" charset="utf-8"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.11/crossfilter.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/dc/1.7.3/dc.min.js"></script>

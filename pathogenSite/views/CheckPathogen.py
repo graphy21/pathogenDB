@@ -381,7 +381,7 @@ class Reporter:
 				'pathogen_link': "http://en.wikipedia.org/", #pathogen_record[]
 				}
 			self.pathogen_info[name] = informations
-			print 'pathogen', name, count
+			#print 'pathogen', name, count
 		
 		self.log = {'log_pathogen': log_pathogen, 'log_species': log_species,
 				'log_filter': log_filter}
@@ -494,7 +494,7 @@ class Reporter:
 			total_kind = len(self.micro_dist[rank].keys())
 			total_count = sum([self.micro_dist[rank][k] for k in\
 					self.micro_dist[rank]])
-			print rank, total_kind, total_count
+			#print rank, total_kind, total_count
 
 
 
