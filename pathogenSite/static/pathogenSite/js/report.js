@@ -17,7 +17,7 @@ var data = parseDataForDC(oriData); // decide location of this variable !!
 
 $('.exp').css('cursor', 'help');
 $('.exp').tooltip({show: {effect:'Fade', duration:10}});
-$('.row').css('margin-top','20px');
+$('.row').css('margin-top','10px');
 $(document).ready(function(){
 	for (var k in indexToSample){
 		if (indexToSample.hasOwnProperty(k)){
@@ -45,6 +45,41 @@ $(document).ready(function(){
 		dc.redrawAll();
 	});
 });
+
+
+/* functions
+ */
+function shuffle (data) {
+	for (var j, x, i = data.length; i; j = Math.floor(Math.random() * i), x = data[--i], data[i] = data[j], data[j] = x);
+
+}
+function makeColors (colorbrewer, count) {
+	var refColors;
+	for (var i = 0, max = colorbrewer.length; i < max; i += 1){
+		refColors = colorbrewer[i];
+		if (count < refColors.length) {
+			break;
+		}
+	}
+	var colors = [];
+	if (count > refColors.length) {
+		var mul = Math.ceil(count/refColors.length);
+		for (var i = 1; i < mul; i+= 1){
+			colors.concat(refColors);
+		}
+		colors = shuffle(colors);
+	} else {
+		count += 2;
+		var gap = Math.floor(refColors.length/count);
+		var accum = gap;
+		for (var i = 0; i < count; i += 1){
+			colors.push(refColors[accum]);
+			accum += gap;
+		}
+	}
+	return colors;
+}
+
 
 /* variables 
  * */
@@ -155,7 +190,8 @@ samplePieChart
 genusPieChart
 	.width(200)        
 	.height(200)       
-	.radius(90)        
+	.radius(90)
+	.colors(makeColors (colorbrewer, genusDimGroup.size()))
 	.dimension(genusDim)
 	.group(genusDimGroup);
 
@@ -164,13 +200,15 @@ speciesPieChart
 	.height(200)       
 	.radius(90)        
 	.dimension(speciesDim)
-	.group(speciesDimGroup);
+	.group(speciesDimGroup)
+	.colors(makeColors (colorbrewer, speciesDimGroup.size()));
 
 speciesPerSampleBarChart
 	.width(790)
 	.height(300)
 	.margins({top:20, right:20, bottom:30, left:50})
 	.dimension(sampleDim)
+	.colors( makeColors(colorbrewer, speciesPerSamples.length + 1 ))
 	.group(speciesPerSamples[0]['value'], speciesPerSamples[0]['key'])
 	.valueAccessor(function(p) {
 		return p.value;
@@ -199,6 +237,7 @@ lineChart
 	.height(300)
 	.margins({top:20, right:20, bottom:30, left:50})
 	.dimension(sampleDim)
+	.colors( makeColors( speciesPerSamples.length + 1 ))
 	.valueAccessor(function(p){
 		return p.value;
 	})
