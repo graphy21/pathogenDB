@@ -55,28 +55,32 @@ function shuffle (data) {
 }
 function makeColors (colorbrewer, count) {
 	var refColors;
+	console.log('000', count);
 	for (var i = 0, max = colorbrewer.length; i < max; i += 1){
 		refColors = colorbrewer[i];
-		if (count < refColors.length) {
+		console.log('1111', refColors);
+		if (count <= refColors.length) {
 			break;
 		}
 	}
+	console.log('2222', refColors, typeof refColors );
 	var colors = [];
 	if (count > refColors.length) {
 		var mul = Math.ceil(count/refColors.length);
 		for (var i = 1; i < mul; i+= 1){
 			colors.concat(refColors);
 		}
-		colors = shuffle(colors);
+		//colors = shuffle(colors);
 	} else {
-		count += 2;
+		//count += 2;
 		var gap = Math.floor(refColors.length/count);
 		var accum = gap;
 		for (var i = 0; i < count; i += 1){
+			accum  = gap * i;
 			colors.push(refColors[accum]);
-			accum += gap;
 		}
 	}
+	console.log('3333', colors, gap);
 	return colors;
 }
 
@@ -208,7 +212,7 @@ speciesPerSampleBarChart
 	.height(300)
 	.margins({top:20, right:20, bottom:30, left:50})
 	.dimension(sampleDim)
-	.colors( makeColors(colorbrewer, speciesPerSamples.length + 1 ))
+	.colors( makeColors(colorbrewer, speciesPerSamples.length))
 	.group(speciesPerSamples[0]['value'], speciesPerSamples[0]['key'])
 	.valueAccessor(function(p) {
 		return p.value;
@@ -237,7 +241,7 @@ lineChart
 	.height(300)
 	.margins({top:20, right:20, bottom:30, left:50})
 	.dimension(sampleDim)
-	.colors( makeColors( speciesPerSamples.length + 1 ))
+	.colors( makeColors( colorbrewer, speciesPerSamples.length ))
 	.valueAccessor(function(p){
 		return p.value;
 	})
