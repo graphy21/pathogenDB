@@ -55,15 +55,12 @@ function shuffle (data) {
 }
 function makeColors (colorbrewer, count) {
 	var refColors;
-	console.log('000', count);
 	for (var i = 0, max = colorbrewer.length; i < max; i += 1){
 		refColors = colorbrewer[i];
-		console.log('1111', refColors);
 		if (count <= refColors.length) {
 			break;
 		}
 	}
-	console.log('2222', refColors, typeof refColors );
 	var colors = [];
 	if (count > refColors.length) {
 		var mul = Math.ceil(count/refColors.length);
@@ -80,7 +77,6 @@ function makeColors (colorbrewer, count) {
 			colors.push(refColors[accum]);
 		}
 	}
-	console.log('3333', colors, gap);
 	return colors;
 }
 
