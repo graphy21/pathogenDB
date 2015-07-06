@@ -65,6 +65,30 @@
 			<div class="clearfix"></div>
 		</div>
 	</div>
+	
+	<div class="row"> 
+		<div id="pathogen-proportion-pie-chart">
+			<strong class="exp" title="genus explanation">Pathogen Proportion</strong>
+			<a class="reset" style="display:none;" href="javascript:pathogenProportionPieChart.filterAll();dc.redrawAll();">reset</a>
+			<div class="clearfix"></div>
+		</div>
+		<div id="human-pathogen-pie-chart">
+			<strong class="exp" title="genus explanation">Human Pathogen</strong>
+			<a class="reset" style="display:none;" href="javascript:humanPathogenPieChart.filterAll();dc.redrawAll();">reset</a>
+			<div class="clearfix"></div>
+		</div>
+		<div id="animal-pathogen-pie-chart">
+			<strong class="exp" title="genus explanation">Animal Pathogen</strong>
+			<a class="reset" style="display:none;" href="javascript:animalPathogenPieChart.filterAll();dc.redrawAll();">reset</a>
+			<div class="clearfix"></div>
+		</div>
+		<div id="plant-pathogen-pie-chart">
+			<strong class="exp" title="genus explanation">Plant Pathogen</strong>
+			<a class="reset" style="display:none;" href="javascript:plantPathogenPieChart.filterAll();dc.redrawAll();">reset</a>
+			<div class="clearfix"></div>
+		</div>
+	</div>
+
 	<div class="row">
 		<div id="sample-stack-chart">
 			<strong class="exp" title="genus explanation">Species Composition Per Sample</strong>
@@ -153,7 +177,8 @@
 		});
 	</script>
 	<script src="{% static 'pathogenSite/js/colorbrewer.js' %}"></script>
-	<script src="{% static 'pathogenSite/js/report.js' %}"></script>
+	<script src="{% static 'pathogenSite/js/reportCrossFilter.js' %}"></script>
+	<script src="{% static 'pathogenSite/js/reportPerSample.js' %}"></script>
 
 </body>
 </html>
