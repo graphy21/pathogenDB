@@ -18,6 +18,7 @@ var data = parseDataForDC(oriData); // decide location of this variable !!
 $('.exp').css('cursor', 'help');
 $('.exp').tooltip({show: {effect:'Fade', duration:10}});
 $('.row').css('margin-top','10px');
+$('.row').css('margin-bottom','10px');
 $(document).ready(function(){
 	for (var k in indexToSample){
 		if (indexToSample.hasOwnProperty(k)){

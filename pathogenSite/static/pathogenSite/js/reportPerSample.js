@@ -39,10 +39,22 @@ for (var sample in oriData){
 			{'title':'Genus', 'width':400, 'height':300, 'colors': COLORS}, 
 		divPathogenPie = sample + "-div3-pie1",
 		divPathogenColumn = sample + "-div3-column1",
+		divPathogenTable = sample + '-div3-table',
 		dataPathogenPie = totalData[3],
-		dataPathogenColumn = totalData[4];
-	
+		dataPathogenColumn = totalData[4],
+		dataPathogenTable = makePathogenTableData(data);
 
+	/*	
+	dataPathogenTable = [
+		[{"label":"Name", "pattern":"", "type":"string"},
+		{"label":"Salary", "pattern":"", "type":"string"},
+		{"label":"Full Time Employee","pattern":"", "type":"boolean"}],
+		['Mike',  {v: 10000, f: '$10,000'}, true],
+		['Jim',   {v:8000,   f: '$8,000'},  false],
+		['Alice', {v: 12500, f: '$12,500'}, true],
+		['Bob',   {v: 7000,  f: '$7,000'},  true]
+	];
+	*/
 
 	dataBubble = { 
                 "name": "Pathogen",
@@ -61,21 +73,6 @@ for (var sample in oriData){
                     ]
                 };
 
-	/*
-	dataPathogenPie = [
-                [{"id":"","label":"level","pattern":"","type":"string"},
-                {"id":"","label":"count","pattern":"","type":"number"}],
-                ['NA',1000],
-                ['Opportunistic Pathogen',17],
-                ['Pathogen',9]
-            ];
-
-	dataPathogenColumn = [
-                ['Pathogen', 'Pathogen', 'Opportunistic Pathogen',
-                    { 'role': 'annotation' } ],
-                ['Human', 3, 6, ''], ['Animal', 1, 0, ''], ['Plant', 0, 0, '']
-            ]
-	*/
 
 	google.setOnLoadCallback( 
 		drawTotalChartCallBack(divSankey, dataSankey)
@@ -88,6 +85,9 @@ for (var sample in oriData){
 	google.setOnLoadCallback(
 		drawPathogenChartCallBack(divPathogenPie, divPathogenColumn, 
 			dataPathogenPie, dataPathogenColumn)
+	);
+	google.setOnLoadCallback(
+		drawPathogenTableCallBack(divPathogenTable, dataPathogenTable)
 	);
 	//showConnectivity();
 
@@ -102,10 +102,45 @@ function drawMicrobiomeChartCallBack (divPie1, divPie2, divTable1,
 			options, dataMChartSpecies);
 	};
 }
-function drawPathogenChartCallBack(divPie, divColumn, dataPie, dataColumn) {
+function drawPathogenChartCallBack (divPie, divColumn, dataPie, dataColumn) {
 	return function () {
 		drawPathogenChart(divPie, divColumn, dataPie, dataColumn);
 	};
+}
+function drawPathogenTableCallBack (divTable, dataTable) {
+	return function () {
+		drawPathogenTable(divTable, dataTable);
+	};
+}
+
+function makePathogenTableData (data){
+	var pathogenTableData = [[
+		{"label":"Species", "type":"string"},
+		{"label":"Count", "type":"number"},
+		{"label":"Opportunistic<br />Pathogen<br />(Human)", "type":"boolean"},
+		{"label":"Definitive<br />Pathogen<br />(Human)", "type":"boolean"},
+		{"label":"Opportunistic<br />Pathogen<br />(Animal)","type":"boolean"},
+		{"label":"Definitive<br />Pathogen<br />(Animal)", "type":"boolean"},
+		{"label":"Opportunistic<br />Pathogen<br />(Plant)","type":"boolean"},
+		{"label":"Definitive<br />Pathogen<br />(Plant)", "type":"boolean"},
+	]];
+
+	for (var i = 0, max = data.length; i < max; i += 1){
+		var record = data[i];
+		if (record['is_pathogen'] === 'Pathogen'){
+			var oH = (record['pathogen_human'] == 3) ? true : false,
+				dH = (record['pathogen_human'] == 4) ? true : false,
+				oA = (record['pathogen_animal'] == 3) ? true : false,
+				dA = (record['pathogen_animal'] == 3) ? true : false,
+				oP = (record['pathogen_plant'] == 3) ? true : false,
+				dP = (record['pathogen_plant'] == 3) ? true : false
+				count = record['count']
+				species = record['species'];
+				pathogenTableData.push([species,count,oH,dH,oA,dA,oP,dP]);
+		}
+	}
+
+	return pathogenTableData;
 }
 
 function parseData (data){
@@ -228,9 +263,7 @@ function parseData (data){
 			sankeyData.push(['Pathogen', to, species[i].value.count]);
 		}
 	}
-	console.log('4444', pathogenAll);
 	for (var i = 0, max = pathogenAll.length; i < max; i += 1){
-		console.log('22', pathogenAll);
 		pathogenPieData.push( [pathogenAll[i].key, pathogenAll[i].value] );
 	}
 	
@@ -255,7 +288,6 @@ function parseData (data){
 				''
 		]);
 	}
-	console.log('1111', pathogenPieData);
 	return [sankeyData, genusData, speciesData, pathogenPieData, 
 		   pathogenColumnData];
 }
@@ -470,7 +502,8 @@ function drawMicrobiomeChart(divPie1, divPie2, divTable1, data, options,
 		};
 	});
 
-	table1.draw(data);
+	table1.draw(data, {width: '100%', height: '100%', allowHtml: true, 
+		page:'enable', 'pageSize': 10});
 	$('#div2_table1 table').addClass('table');
 	chart1.draw(data, options);
 	var genus = data.getValue(0,0);
@@ -503,7 +536,17 @@ function drawPathogenChart(divPie, divColumn, dataPie, dataColumn){
 	});
 };
 
-//// 2.3 Pathogen Information
+//// 2.3 Pathogen Table
+function drawPathogenTable(divTable, dataTable){
+	var data = new google.visualization.arrayToDataTable( dataTable );
+	var table = new google.visualization.Table( 
+			document.getElementById(divTable));
+
+	table.draw(data, {width: '100%', height: '100%', allowHtml: true });
+}
+
+
+//// 2.4 Pathogen Information
 function showConnectivity(){
 	$(".group").click(function(){
 		$(".composition").fadeToggle();
