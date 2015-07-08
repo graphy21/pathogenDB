@@ -488,12 +488,12 @@ class Reporter:
 				data['pathogen_human'] = pathogen_info['pathogen_human']
 				data['pathogen_animal'] = pathogen_info['pathogen_animal']
 				data['pathogen_plant'] = pathogen_info['pathogen_plant']
-				data['is_pathogen'] = 'Y' 
+				data['is_pathogen'] = 'Pathogen' 
 			else:                  
 				data['pathogen_human'] = 0
 				data['pathogen_animal'] = 0
 				data['pathogen_plant'] = 0
-				data['is_pathogen'] = 'N'
+				data['is_pathogen'] = 'Non Pathogen'
 			total_data.append(data)
 		return self.change_format(total_data, format)
 

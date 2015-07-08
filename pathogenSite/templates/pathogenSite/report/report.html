@@ -21,7 +21,8 @@
 	</div>
 	<!-- control board -->
 	<div class="row">
-		<hr>
+		<hr style="border-width:3px;">
+		<!--
 		<div class="btn-group">
 			<button type="button" class="btn btn-info dropdown-toggle" id="sort_samles" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				sort samples
@@ -31,6 +32,7 @@
 				<li><a href="javascript:void(0);" id="on_manual">on manual</a></li>
 			</ul>
 		</div>
+		-->
 		<div id="area_for_manual">
 		</div>	
 	</div>
@@ -98,75 +100,70 @@
 		<div id="sample-line-chart"></div>
 	</div>
 
-	<div class="div1 row">
-		<hr>
-		<h3>Data Summary</h3>
-		<h4>Read Count Assignment Flow</h4>
-		<div id="div1_sankey1"></div>
-		<br>
-		<h4>Detected Pathogens & Possible Diseases</h4>
-		<div id="div1_bubble1" class="col-sm-offset-2"></div>
+
+	<div class="row">
+		<hr style="border-width:3px;">
+		<h3>Sample Report</h3>
 	</div>
 
-	<div class="div2 row">
-		<hr>
-		<h3>Data Details</h3>
-		<h4>Total Microbiome Distribution</h4>
-		<div id="div2_table1" class="col-sm-3"></div>
-		<div id="div2_pie1" class="col-sm-4"></div>
-		<div id="div2_pie2" class="col-sm-4"></div>
-	</div>
-
-	<div class="div3 row">
-		<hr>
-		<h4>Pathogen Distribution</h4>
-		<div id="div3_pie1" class="col-sm-5"></div>
-		<div id="div3_column1" class="col-sm-4"></div>
-	</div>
-
-	<div class="div4 row">
-		<hr>
-		<h4>Pathogen Information</h4>
-		<div class="col-sm-4 composition"></div>
-		<div class="col-sm-12">
-			<table class="table">
-				<thead>
-					<tr>
-						<th><Strong>Species</Strong></th>
-						<th><a class="group">[GROUP]</a> <i>Escherichia coli</i></th>
-					</tr>
-				<thead>
-				<tbody>
-					<tr>
-						<td><strong>Basonym</strong></td>
-						<td><i>Bacterium coli commune, Bacillus coli, 
-								Bacterium coli
-						</i></td>
-					</tr>
-					<tr>
-						<td><strong>Taxonomy Group</strong></td>
-						<td><i>Escherichia coli, Shigella flexneri, 
-								Shigella sonnei, Shigella boydii, 
-								Escherichia albertii, Shigella dysenteriae, 
-								Escherichia fergusonii
-						</i></td>
-					</tr>
-				</tbody>
-			</table>
+	{% for sample in samples %}
+		<div class="row">
+			<button class="btn btn-info showReport">Show Report</button>
+			{{ sample }}
 		</div>
+
+		<!--<div style="display:none;">-->
+		<div class="displayNone">
+			<div class="div1 row">
+				<hr>
+				<h3>Data Summary</h3>
+				<h4>Read Count Assignment Flow</h4>
+				<div id="{{ sample }}-div1-sankey1"></div>
+				<br>
+				<h4>Detected Pathogens & Possible Diseases</h4>
+				<div id="{{ sample }}-div1-bubble1" class="col-sm-offset-2"></div>
+			</div>
+
+			<div class="div2 row">
+				<hr>
+				<h3>Data Details</h3>
+				<h4>Total Microbiome Distribution</h4>
+				<div id="{{ sample }}-div2-table1" class="col-sm-3"></div>
+				<div id="{{ sample }}-div2-pie1" class="col-sm-4"></div>
+				<div id="{{ sample }}-div2-pie2" class="col-sm-4"></div>
+			</div>
+
+			<div class="div3 row">
+				<hr>
+				<h4>Pathogen Distribution</h4>
+				<div id="{{ sample }}-div3-pie1" class="col-sm-5"></div>
+				<div id="{{ sample }}-div3-column1" class="col-sm-4"></div>
+			</div>
+			<div class="row">
+				<hr>
+			</div>
+			<!--</div>-->
+		</div>
+	{% endfor %}
+
+	<div class="row">
+		<hr style="border-width:3px;">
 	</div>
 </div>
+
 
 	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" charset="utf-8"></script>
+	<script src="https://www.google.com/jsapi"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.11/crossfilter.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/dc/1.7.3/dc.min.js"></script>
 	<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.0.0-alpha.5/dc.min.js"></script>-->
 
 	<script>
 		var oriData = {{ data|safe }}
+		/*
 		$("#sort_samples li a").click(function(){
 			var sortBy = $(this).text();
 			if (sortBy === "by time"){
@@ -175,6 +172,7 @@
 				return true;	
 			}
 		});
+		*/
 	</script>
 	<script src="{% static 'pathogenSite/js/colorbrewer.js' %}"></script>
 	<script src="{% static 'pathogenSite/js/reportCrossFilter.js' %}"></script>

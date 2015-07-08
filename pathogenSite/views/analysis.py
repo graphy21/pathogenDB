@@ -16,7 +16,8 @@ class PathogenAnalysis(TemplateView):
 	def post(self, request, *args, **kwargs):
 		"""
 		total_micro_dist = {
-		'sample1': {'sample':, 'genus':, 'species':, 'count':}
+		'sample1': {'sample':, 'genus':, 'species':, 'count':, 'is_pathogen':,
+			'pathogen_human':, 'pathogen_animal':, 'pathogen_plant':}
 		}
 		"""
 		context = self.get_context_data()
@@ -24,11 +25,13 @@ class PathogenAnalysis(TemplateView):
 
 		sample_index = 0
 		total_micro_dist = {}
+		samples = []
 		for clc_file in clc_files:
 			sample_index += 1
 			clc_file = json.loads(clc_file)
 			file_path = clc_file['path']
 			sample_name = clc_file['name']
+			samples.append(sample_name)
 
 			reporter = Reporter(file_path)
 			reporter.check_rank_count()
@@ -44,7 +47,7 @@ class PathogenAnalysis(TemplateView):
 		# Total Microbiome Distribution 
 		# Pathogen Distribution
 		# Pathogen Information
-		context['well'] = reporter.get_clc_file()
+		context['samples'] = samples
 		context['data'] = json.dumps(total_micro_dist)
 		return super(PathogenAnalysis, self).render_to_response(context)
 

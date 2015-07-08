@@ -79,7 +79,39 @@ function makeColors (colorbrewer, count) {
 	}
 	return colors;
 }
-
+function makePathogenOrganismData (data) {
+	var organism = {'human':0, 'animal':0, 'plant':0},
+		result;
+	for (var i = 0, max = data.length; i < max; i += 1){
+		var d = data[i];
+		for (var j = 0, max = d.pathogen.length; j < max; j += 1 ){
+			switch (j){
+				case 0:
+					organism['human'] += d.pathogen[i];
+					break;
+				case 1:
+					organism['animal'] += d.pathogen[i];
+					break;
+				case 2:
+					organism['plant'] += d.pathogen[i];
+					break;
+			}
+		}
+	}
+	for (var k in organism){
+		if (organism.hasOwnProperty(k)){
+			result['organism'] = k;
+			result['count'] = organism[k];
+		}
+	}
+	return result;
+}
+function calculateGapBetweenBar(barCount, gapToBarRatio, totalWidth){
+	totalWidth = typeof totalWidth !== 'undefined' ? totalWidth : 790;
+	gapToBarRatio = typeof gapToBarRatio !== 'undefined' ? gapToBarRatio : 0.4;
+	var x = totalWidth / (barCount / gapToBarRatio + barCount - 1);
+	return Math.round(x);
+}
 
 /* variables 
  * */
@@ -91,8 +123,13 @@ var topGenusCount = 5,
 	speciesPieChart = dc.pieChart('#species-pie-chart'),
 	speciesPerSampleBarChart = dc.barChart('#sample-stack-chart'),
 	lineChart = dc.lineChart('#sample-line-chart'),
+	pathogenProportionPieChart = dc.pieChart('#pathogen-proportion-pie-chart'),
+	humanPathogenPieChart = dc.pieChart('#human-pathogen-pie-chart'),
+	animalPathogenPieChart = dc.pieChart('#animal-pathogen-pie-chart'),
+	plantPathogenPieChart = dc.pieChart('#plant-pathogen-pie-chart'),
 
 	microbiome = crossfilter(data),
+	pathogenOrganism = crossfilter([]),
 	all = microbiome.groupAll(),
 
 	sampleDim = microbiome.dimension(function (d) {
@@ -103,6 +140,7 @@ var topGenusCount = 5,
 	}),
 	indexToSample = {},
 	sampleToIndex = {},
+	sampleCount = 0,
 
 	genusDim = microbiome.dimension(function (d){
 		return d.genus;    
@@ -116,15 +154,41 @@ var topGenusCount = 5,
 	speciesDimGroup = speciesDim.group().reduceSum(function (d) {
 		return d.count;
 	}),
+	pathogenDim = microbiome.dimension(function (d) {
+		return d.is_pathogen;
+	}),
+	pathogenDimProportionGroup = pathogenDim.group().reduceSum(function (d) {
+		return d.count;
+	}),
+	humanPathogenDim = microbiome.dimension(function (d) {
+		return d.pathogen_human;
+	}),
+	humanPathogenDimGroup = humanPathogenDim.group().reduceSum(function (d) {
+		return d.count;
+	}),
+	animalPathogenDim = microbiome.dimension(function (d) {
+		return d.pathogen_animal;
+	}),
+	animalPathogenDimGroup = animalPathogenDim.group().reduceSum(function (d) {
+		return d.count;
+	}),
+	plantPathogenDim = microbiome.dimension(function (d) {
+		return d.pathogen_plant;
+	}),
+	plantPathogenDimGroup = plantPathogenDim.group().reduceSum(function (d) {
+		return d.count;
+	}),
 
 	topSpecies = speciesDimGroup.top(topSpeciesCount),
 	topSpeciesName = [],
 
-	speciesPerSamples = [],
-	speciesPerSamples2 = [];
+	speciesPerSamples = [];
 
 /* populate variables 
  * */
+speciesDimGroup.all = function(){
+	return speciesDimGroup.top(Infinity);
+}
 for (var i = 0, max = topSpecies.length; i < max; i +=1 ){
 	topSpeciesName.push(topSpecies[i].key);
 }
@@ -169,6 +233,7 @@ for (var i=0, max=sampleDimGroup.all().length; i < max; i += 1){
 	var t = sampleDimGroup.all()[i];
 	indexToSample[i] = t.key;
 	sampleToIndex[t.key] = i;
+	sampleCount = i + 1;
 }
 
 /* draw chart 
@@ -224,7 +289,8 @@ speciesPerSampleBarChart
 	.elasticX(true)
 	.elasticY(true)
 	.centerBar(true)
-	.gap(5)
+	//.gap(20)
+	.gap(calculateGapBetweenBar(sampleCount))
 	.renderHorizontalGridLines(true)
 	.title(function(d){
 		return d.y;
@@ -254,6 +320,38 @@ lineChart
 	.elasticX(true)
 	.elasticY(true);
 
+pathogenProportionPieChart
+	.width(200)        
+	.height(200)       
+	.radius(90)
+	.innerRadius(20)
+	.colors(makeColors (colorbrewer, pathogenDimProportionGroup.size()))
+	.dimension(pathogenDim)
+	.group(pathogenDimProportionGroup);
+
+humanPathogenPieChart
+	.width(160)        
+	.height(160)       
+	.radius(50)
+	.colors(makeColors (colorHuman, humanPathogenDimGroup.size()))
+	.dimension(humanPathogenDim)
+	.group(humanPathogenDimGroup);
+
+animalPathogenPieChart
+	.width(160)        
+	.height(160)       
+	.radius(50)
+	.colors(makeColors (colorAnimal, animalPathogenDimGroup.size()))
+	.dimension(animalPathogenDim)
+	.group(animalPathogenDimGroup);
+
+plantPathogenPieChart
+	.width(160)        
+	.height(160)       
+	.radius(50)
+	.colors(makeColors (colorPlant, plantPathogenDimGroup.size()))
+	.dimension(plantPathogenDim)
+	.group(plantPathogenDimGroup);
 
 dc.renderAll();
 
