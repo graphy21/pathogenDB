@@ -10,6 +10,7 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dc/1.7.3/dc.min.css">
+	<link rel="stylesheet" href="http://cdn.datatables.net/1.10.7/css/jquery.dataTables.min.css">
 	<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dc/2.0.0-alpha.5/dc.min.css">-->
 
 
@@ -97,7 +98,18 @@
 			<a class="reset" style="display:none;" href="javascript:speciesPerSampleBarChart.filterAll();dc.redrawAll();">reset</a>
 			<div class="clearfix"></div>
 		</div>
-		<div id="sample-line-chart"></div>
+		<div id="pathogen-line-chart">
+			<strong class="exp" title="pathogen proportion">Pathogen Proportion</strong>
+			<a class="reset" style="display:none;" href="javascript:pathogenLineChart.filterAll();dc.redrawAll();">reset</a>
+			<div class="clearfix"></div>
+		</div>
+		<div>
+			<strong class="exp" title="pathogen table">Pathogen Table</strong>
+			<a class="reset" style="display:none;" href="javascript:pathogenTable.filterAll();dc.redrawAll();">reset</a>
+			<table id='pathogen-table'>
+			</table>
+			<div class="clearfix"></div>
+		</div>
 	</div>
 
 
@@ -118,7 +130,7 @@
 				<hr>
 				<h3>Data Summary</h3>
 				<h4>Read Count Assignment Flow</h4>
-				<div id="{{ sample }}-div1-sankey1"></div>
+				<div id="{{ sample }}-div1-sankey1" class="col-sm-12"></div>
 				<br>
 				<h4>Detected Pathogens & Possible Diseases</h4>
 				<div id="{{ sample }}-div1-bubble1" class="col-sm-offset-2"></div>
@@ -151,6 +163,11 @@
 
 	<div class="row">
 		<hr style="border-width:3px;">
+		<h3>Pathogen Information</h3>
+	</div>
+	<div class="row">
+		<hr>
+		<h4>pathogen1</h4>
 	</div>
 </div>
 
@@ -162,6 +179,7 @@
 	<script src="https://www.google.com/jsapi"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.11/crossfilter.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/dc/1.7.3/dc.min.js"></script>
+	<script src="http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
 	<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.0.0-alpha.5/dc.min.js"></script>-->
 
 	<script>

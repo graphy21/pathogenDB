@@ -22,14 +22,17 @@ var COLORS = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6",
 	"#b77322", "#16d620", "#b91383", "#f4359e", "#9c5935", "#a9c413", "#2a778d",
 	"#668d1c", "#bea413", "#0c5922", "#743411"];
 
-
+/*
+ * runPerSampleDrawing start
+ */
+function runPerSampleDrawing(){ 
 for (var sample in oriData){
 	var data = oriData[sample],
 		divSankey = sample + "-div1-sankey1",
 		totalData = parseData(data),
 		dataSankey = totalData[0],
-		divBubble = sample + "-div1-bubble1",
-		dataBubble,
+		//divBubble = sample + "-div1-bubble1",
+		//dataBubble,
 		divPie1 = sample + "-div2-pie1", 
 		divPie2 = sample + "-div2-pie2",
 		divTable1 = sample + "-div2-table1", 
@@ -45,17 +48,6 @@ for (var sample in oriData){
 		dataPathogenTable = makePathogenTableData(data);
 
 	/*	
-	dataPathogenTable = [
-		[{"label":"Name", "pattern":"", "type":"string"},
-		{"label":"Salary", "pattern":"", "type":"string"},
-		{"label":"Full Time Employee","pattern":"", "type":"boolean"}],
-		['Mike',  {v: 10000, f: '$10,000'}, true],
-		['Jim',   {v:8000,   f: '$8,000'},  false],
-		['Alice', {v: 12500, f: '$12,500'}, true],
-		['Bob',   {v: 7000,  f: '$7,000'},  true]
-	];
-	*/
-
 	dataBubble = { 
                 "name": "Pathogen",
                 "children": [
@@ -72,12 +64,13 @@ for (var sample in oriData){
                         ]},
                     ]
                 };
+	*/
 
 
 	google.setOnLoadCallback( 
 		drawTotalChartCallBack(divSankey, dataSankey)
 	);
-	drawBubbleChart(divBubble, dataBubble);
+	//drawBubbleChart(divBubble, dataBubble);
 	google.setOnLoadCallback(
 		drawMicrobiomeChartCallBack(divPie1, divPie2, divTable1, 
 			dataMChartGenus, dataMChartSpecies, options)
@@ -128,12 +121,12 @@ function makePathogenTableData (data){
 	for (var i = 0, max = data.length; i < max; i += 1){
 		var record = data[i];
 		if (record['is_pathogen'] === 'Pathogen'){
-			var oH = (record['pathogen_human'] == 3) ? true : false,
-				dH = (record['pathogen_human'] == 4) ? true : false,
-				oA = (record['pathogen_animal'] == 3) ? true : false,
+			var dH = (record['pathogen_human'] == 3) ? true : false,
+				oH = (record['pathogen_human'] == 4) ? true : false,
 				dA = (record['pathogen_animal'] == 3) ? true : false,
-				oP = (record['pathogen_plant'] == 3) ? true : false,
-				dP = (record['pathogen_plant'] == 3) ? true : false
+				oA = (record['pathogen_animal'] == 3) ? true : false,
+				dP = (record['pathogen_plant'] == 3) ? true : false,
+				oP = (record['pathogen_plant'] == 3) ? true : false
 				count = record['count']
 				species = record['species'];
 				pathogenTableData.push([species,count,oH,dH,oA,dA,oP,dP]);
@@ -326,7 +319,7 @@ function drawTotalChart(div, data){
 	var data = new google.visualization.arrayToDataTable( data ),
 		colors = ['#a6cee3', '#b2df8a', '#fb9a99', '#fdbf6f', '#cab2d6', 
 			'#ffff99', '#1f78b4', '#33a02c'],
-		options = {width: 800, height: 1200, sankey:{'node': {'colors':colors},
+		options={width: '100%', height: 1200, sankey:{'node': {'colors':colors},
 			'link':{'colorMode':'gradient', 'colors':colors}
 		}},
 		sankey1 = new google.visualization.Sankey(
@@ -605,4 +598,11 @@ function showConnectivity(){
 			return "translate(" + d.x + "," + d.y + ")"; });
 	});
 };
+
+}
+
+/*
+ * runPerSampleDrawing end
+ */
+runPerSampleDrawing();
 $('.composition').hide()

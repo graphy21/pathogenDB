@@ -150,7 +150,7 @@ class SampleListView(ListView):
 	model = CLCSample
 	template_name = 'pathogenSite/sample_list.html'
 	context_object_name = 'sample_list'
-	paginate_by = 15
+	paginate_by = 20
 	def get_context_data(self, **kargs):
 		params = copy.deepcopy(self.request.GET)
 		context = super(SampleListView, self).get_context_data(**kargs)

@@ -42,7 +42,7 @@ $(document).ready(function(){
 		}
 		// update Chart
 		speciesPerSampleBarChart.x(d3.scale.ordinal().domain(order));
-		lineChart.x(d3.scale.ordinal().domain(order));
+		pathogenLineChart.x(d3.scale.ordinal().domain(order));
 		dc.redrawAll();
 	});
 });
@@ -123,7 +123,8 @@ var topGenusCount = 5,
 	genusPieChart = dc.pieChart('#genus-pie-chart'),
 	speciesPieChart = dc.pieChart('#species-pie-chart'),
 	speciesPerSampleBarChart = dc.barChart('#sample-stack-chart'),
-	lineChart = dc.lineChart('#sample-line-chart'),
+	pathogenLineChart = dc.lineChart('#pathogen-line-chart'),
+	pathogenTable = dc.dataTable('#pathogen-table'),
 	pathogenProportionPieChart = dc.pieChart('#pathogen-proportion-pie-chart'),
 	humanPathogenPieChart = dc.pieChart('#human-pathogen-pie-chart'),
 	animalPathogenPieChart = dc.pieChart('#animal-pathogen-pie-chart'),
@@ -152,9 +153,19 @@ var topGenusCount = 5,
 	speciesDim = microbiome.dimension(function (d){
 		return d.species;
 	}),
-	speciesDimGroup = speciesDim.group().reduceSum(function (d) {
-		return d.count;
-	}),
+	speciesDimGroup = speciesDim.group().reduce(
+		function (p, d) { 
+			p.count += d.count;
+			p.samples[d.sample] = d.count;
+			return p; 
+		},
+		function (p, d) {
+			p.count -= d.count;
+			delete p.samples[d.sample];
+			return p;
+		},
+		function () { return {"count":0, "samples":{}}; }
+	).order( function (d) { return d.count; }),
 	pathogenDim = microbiome.dimension(function (d) {
 		return d.is_pathogen;
 	}),
@@ -184,6 +195,7 @@ var topGenusCount = 5,
 	topSpeciesName = [],
 
 	speciesPerSamples = [];
+
 
 /* populate variables 
  * */
@@ -267,7 +279,8 @@ speciesPieChart
 	.radius(90)        
 	.dimension(speciesDim)
 	.group(speciesDimGroup)
-	.colors(makeColors (colorbrewer, speciesDimGroup.size()));
+	.colors(makeColors (colorbrewer, speciesDimGroup.size()))
+	.valueAccessor(function (p) { return p.value.count; });
 
 speciesPerSampleBarChart
 	.width(790)
@@ -290,14 +303,13 @@ speciesPerSampleBarChart
 	.elasticX(true)
 	.elasticY(true)
 	.centerBar(true)
-	//.gap(20)
 	.gap(calculateGapBetweenBar(sampleCount))
 	.renderHorizontalGridLines(true)
 	.title(function(d){
 		return d.y;
 	});
 
-lineChart
+pathogenLineChart
 	.renderArea(true)
 	.xUnits(dc.units.ordinal)
 	.width(790)
@@ -311,10 +323,9 @@ lineChart
 	.group(speciesPerSamples[0]['value'], speciesPerSamples[0]['key']);
 for (var i = 1, max = speciesPerSamples.length; i < max; i+=1){
 	var comp = speciesPerSamples[i];
-	lineChart.stack(comp['value'], comp['key']);
+	pathogenLineChart.stack(comp['value'], comp['key']);
 }
-
-lineChart
+pathogenLineChart
 	.renderHorizontalGridLines(true)
 	.x(d3.scale.ordinal())
 	.xUnits(dc.units.ordinal)
@@ -329,6 +340,20 @@ pathogenProportionPieChart
 	.colors(makeColors (colorbrewer, pathogenDimProportionGroup.size()))
 	.dimension(pathogenDim)
 	.group(pathogenDimProportionGroup);
+
+
+
+pathogenTable
+	.dimension(speciesDim)
+	.group(function (d) { return 'table'; })
+	.size(20)
+	.columns([
+		function (d) { return d.species; },
+		function (d) { return d.sample; },
+		function (d) { return d.count; },
+		function (d) { return d.is_pathogen; }
+	])
+
 
 humanPathogenPieChart
 	.width(160)        
@@ -353,6 +378,8 @@ plantPathogenPieChart
 	.colors(makeColors (colorPlant, plantPathogenDimGroup.size()))
 	.dimension(plantPathogenDim)
 	.group(plantPathogenDimGroup);
+
+
 
 dc.renderAll();
 
