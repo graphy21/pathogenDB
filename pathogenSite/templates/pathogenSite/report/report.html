@@ -9,8 +9,8 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dc/1.7.3/dc.min.css">
 	<link rel="stylesheet" href="http://cdn.datatables.net/1.10.7/css/jquery.dataTables.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dc/1.7.3/dc.min.css">
 	<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dc/2.0.0-alpha.5/dc.min.css">-->
 
 
@@ -51,43 +51,59 @@
 	<!-- total samples stats -->
 	<div class="row">
 		<hr>
-		<div id="sample-pie-chart">
-			<strong class="exp" title="샘플의 리드 카운트 갯수 비율입니다.">Read Count Proportion</strong>
-			<a class="reset" style="display:none;" href="javascript:samplePieChart.filterAll();dc.redrawAll();">reset</a>
-			<div class="clearfix">
-			</div>	
+		<div class="col-sm-8">
+			<div id="sample-pie-chart">
+				<strong class="exp" title="샘플의 리드 카운트 갯수 비율입니다.">Read Count Proportion</strong>
+				<a class="reset" style="display:none;" href="javascript:samplePieChart.filterAll();dc.redrawAll();">reset</a>
+				<div class="clearfix">
+				</div>	
+			</div>
+			<div id="genus-pie-chart">
+				<strong class="exp" title="well">Genus Composition</strong>
+				<a class="reset" style="display:none;" href="javascript:genusPieChart.filterAll();dc.redrawAll();">reset</a>
+				<div class="clearfix"></div>
+			</div>
+			<div id="species-pie-chart">
+				<strong class="exp" title="species explanation">Species Composition</strong>
+				<a class="reset" style="display:none;" href="javascript:speciesPieChart.filterAll();dc.redrawAll();">reset</a>
+				<div class="clearfix"></div>
+			</div>
+			<div id="pathogen-proportion-pie-chart">
+				<strong class="exp" title="genus explanation">Pathogen Proportion</strong>
+				<a class="reset" style="display:none;" href="javascript:pathogenProportionPieChart.filterAll();dc.redrawAll();">reset</a>
+				<div class="clearfix"></div>
+			</div>
+			<div id="human-pathogen-pie-chart">
+				<strong class="exp" title="genus explanation">Human Pathogen</strong>
+				<a class="reset" style="display:none;" href="javascript:humanPathogenPieChart.filterAll();dc.redrawAll();">reset</a>
+				<div class="clearfix"></div>
+			</div>
+			<div id="animal-pathogen-pie-chart">
+				<strong class="exp" title="genus explanation">Animal Pathogen</strong>
+				<a class="reset" style="display:none;" href="javascript:animalPathogenPieChart.filterAll();dc.redrawAll();">reset</a>
+				<div class="clearfix"></div>
+			</div>
+			<div id="plant-pathogen-pie-chart">
+				<strong class="exp" title="genus explanation">Plant Pathogen</strong>
+				<a class="reset" style="display:none;" href="javascript:plantPathogenPieChart.filterAll();dc.redrawAll();">reset</a>
+				<div class="clearfix"></div>
+			</div>
 		</div>
-		<div id="genus-pie-chart">
-			<strong class="exp" title="well">Genus Composition</strong>
-			<a class="reset" style="display:none;" href="javascript:genusPieChart.filterAll();dc.redrawAll();">reset</a>
-			<div class="clearfix"></div>
-		</div>
-		<div id="species-pie-chart">
-			<strong class="exp" title="species explanation">Species Composition</strong>
-			<a class="reset" style="display:none;" href="javascript:speciesPieChart.filterAll();dc.redrawAll();">reset</a>
-			<div class="clearfix"></div>
-		</div>
-	</div>
-	
-	<div class="row"> 
-		<div id="pathogen-proportion-pie-chart">
-			<strong class="exp" title="genus explanation">Pathogen Proportion</strong>
-			<a class="reset" style="display:none;" href="javascript:pathogenProportionPieChart.filterAll();dc.redrawAll();">reset</a>
-			<div class="clearfix"></div>
-		</div>
-		<div id="human-pathogen-pie-chart">
-			<strong class="exp" title="genus explanation">Human Pathogen</strong>
-			<a class="reset" style="display:none;" href="javascript:humanPathogenPieChart.filterAll();dc.redrawAll();">reset</a>
-			<div class="clearfix"></div>
-		</div>
-		<div id="animal-pathogen-pie-chart">
-			<strong class="exp" title="genus explanation">Animal Pathogen</strong>
-			<a class="reset" style="display:none;" href="javascript:animalPathogenPieChart.filterAll();dc.redrawAll();">reset</a>
-			<div class="clearfix"></div>
-		</div>
-		<div id="plant-pathogen-pie-chart">
-			<strong class="exp" title="genus explanation">Plant Pathogen</strong>
-			<a class="reset" style="display:none;" href="javascript:plantPathogenPieChart.filterAll();dc.redrawAll();">reset</a>
+		<div class="col-sm-offset-8">
+			<div class="row">
+				<strong class="exp" title="pathogen table">
+					Pathogen Table
+				</strong>
+				<table id="pathogen-table" class="display">
+					<thead>
+						<tr>
+							<th>Species</th>
+							<th>Count</th>
+							<th>Pathogen</th>
+						</tr>
+					</thead>
+				</table>
+			</div>
 			<div class="clearfix"></div>
 		</div>
 	</div>
@@ -101,13 +117,6 @@
 		<div id="pathogen-line-chart">
 			<strong class="exp" title="pathogen proportion">Pathogen Proportion</strong>
 			<a class="reset" style="display:none;" href="javascript:pathogenLineChart.filterAll();dc.redrawAll();">reset</a>
-			<div class="clearfix"></div>
-		</div>
-		<div>
-			<strong class="exp" title="pathogen table">Pathogen Table</strong>
-			<a class="reset" style="display:none;" href="javascript:pathogenTable.filterAll();dc.redrawAll();">reset</a>
-			<table id='pathogen-table'>
-			</table>
 			<div class="clearfix"></div>
 		</div>
 	</div>

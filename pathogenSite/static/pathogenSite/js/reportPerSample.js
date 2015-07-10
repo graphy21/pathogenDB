@@ -13,7 +13,7 @@ $("button.showReport").click(function (){
 });
 
 $(document).ready(function () {
-	$('.displayNone').hide(100);
+	$('.displayNone').hide(1000);
 });
 
 var COLORS = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6",
