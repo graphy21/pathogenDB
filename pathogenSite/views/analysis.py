@@ -16,8 +16,8 @@ class PathogenAnalysis(TemplateView):
 	def post(self, request, *args, **kwargs):
 		"""
 		total_micro_dist = {
-		'sample1': {'sample':, 'genus':, 'species':, 'count':, 'is_pathogen':,
-			'pathogen_human':, 'pathogen_animal':, 'pathogen_plant':}
+		'sample1': [{'sample':, 'genus':, 'species':, 'count':, 'is_pathogen':,
+			'pathogen_human':, 'pathogen_animal':, 'pathogen_plant':}],
 		}
 		"""
 		context = self.get_context_data()
