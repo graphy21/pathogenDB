@@ -2,6 +2,13 @@
 
 {% block title %}Introduction Page{% endblock %}
 
+{% block style %}
+<style>
+	.row{
+		margin-top: 5px;
+	}
+</style>
+{% endblock %}
 
 {% block content %}
 <div id="myModal2" class="modal fade">
@@ -34,15 +41,80 @@ ss="modal">Close</button>
 	</div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-<div>
+<div class="row">
 	<form>
 		{% csrf_token %}
-		{{ form }}
-		<input type="submit" value="submit">
+		
+		<div class="col-sm-6">
+			<div class="row">
+				<div class="form-group">
+					{{ form.pathogen_human.errors }}
+					<label for="{{ form.pathogen_human.id_for_label }}" class="col-sm-3 control-label">Human Pathogen</label>
+					<div class="col-sm-7">
+						{{ form.pathogen_human }}	
+					</div>                  
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="form-group">
+					{{ form.pathogen_animal.errors }}
+					<label for="{{ form.pathogen_animal.id_for_label }}" class="col-sm-3 control-label">animal Pathogen</label>
+					<div class="col-sm-7">
+						{{ form.pathogen_animal }}	
+					</div>                  
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="form-group">
+					{{ form.pathogen_plant.errors }}
+					<label for="{{ form.pathogen_plant.id_for_label }}" class="col-sm-3 control-label">plant Pathogen</label>
+					<div class="col-sm-7">
+						{{ form.pathogen_plant }}	
+					</div>                  
+				</div>
+			</div>
+		</div>
+
+		<div class="col-sm-6">
+			<div class="row">
+				<div class="form-group">
+					{{ form.name.errors }}
+					<label for="{{ form.name.id_for_label }}" class="col-sm-3 control-label">Name</label>
+					<div class="col-sm-9">
+						<input type="{{ form.name.field.widget.input_type }}" class="form-control" id="{{ form.name.id_for_label }}" name="{{ form.name.name }}" placeholder="{{ form.name.name }}">
+					</div>                  
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="form-group">
+					{{ form.pathogen_disease_eng.errors }}
+					<label for="{{ form.pathogen_disease_eng.id_for_label }}" class="col-sm-3 control-label">Disease</label>
+					<div class="col-sm-9">
+						<input type="{{ form.pathogen_disease_eng.field.widget.input_type }}" class="form-control" id="{{ form.pathogen_disease_eng.id_for_label }}" name="{{ form.pathogen_disease_eng.name }}" placeholder="{{ form.pathogen_disease_eng.name }}">
+					</div>                  
+				</div>
+			</div>
+
+			<div class="row text-right">
+				<button type="submit" class="btn btn-info">Search</button>
+				&nbsp;&nbsp;&nbsp; 
+			</div>
+		</div>
+
 	</form>
 </div>
+<hr/>
 <div class="table-responsive">
 	<table class="table table-striped table-hover">
+		<col width="8%">
+		<col width="18%">
+		<col width="10%">
+		<col width="10%">
+		<col width="10%">
+		<col width="">
 		<thead>
 			<tr>
 				<th class="resize">ID</th>
@@ -50,6 +122,7 @@ ss="modal">Close</button>
 				<th>Pathogen Human</th>
 				<th>Pathogen Animal</th>
 				<th>Pathogen Plant</th>
+				<th>Disease</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -66,9 +139,10 @@ ss="modal">Close</button>
 					-->
 				</td>
 				<td>{{ pathogen.name }}</td>
-				<td>{{ pathogen.pathogen_human }}</td>
-				<td>{{ pathogen.pathogen_animal }}</td>
-				<td>{{ pathogen.pathogen_plant }}</td>
+				<td>{{ pathogen.get_pathogen_human_display }}</td>
+				<td>{{ pathogen.get_pathogen_animal_display }}</td>
+				<td>{{ pathogen.get_pathogen_plant_display }}</td>
+				<td>{{ pathogen.pathogen_disease_eng }}</td>
 			</tr>
 			{% endfor %}
 		</tbody>
@@ -77,6 +151,10 @@ ss="modal">Close</button>
 {% endblock %}
 {% block script %}
 <script>
+$(document).ready(function () {
+	$('select').addClass('form-control');
+	$('select option:first-child').text('-------');
+});
 $(function(){
 	$('table th').resizable();
 });

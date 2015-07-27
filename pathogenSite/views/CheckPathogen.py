@@ -293,7 +293,7 @@ class Reporter:
 	def __init__(self, clc_file):
 		self.clc_file = clc_file
 		self.cp = CLCparser(self.clc_file)
-		self.sp = MySQLdbParser(PATHOGEN_DB_HOST, USER, PASSWORD, 'ssu_prok')
+		self.sp = MySQLdbParser(PATHOGEN_DB_HOST, USER, PASSWORD, 'ssu_prok_150727')
 		self.pp = MySQLdbParser(PATHOGEN_DB_HOST, USER, PASSWORD, 'pathogen')
 		self.mc = MicrobiomeClassificationTree(MICROBIOME_CLASSIFICATION_FILE)
 		self.converter = AccNameConverter()

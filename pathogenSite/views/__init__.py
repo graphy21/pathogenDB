@@ -30,7 +30,8 @@ class PathogenListForm(ModelForm):
 	"""
 	class Meta:
 		model = Nomen
-		fields = ['name', 'pathogen_human']
+		fields = ['name', 'pathogen_human', 'pathogen_animal', 'pathogen_plant',
+				'pathogen_disease_eng']
 	def __init__(self, *args, **kwargs):
 		super(PathogenListForm, self).__init__(*args, **kwargs)
 		self.fields['name'].required = False

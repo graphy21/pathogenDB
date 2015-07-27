@@ -36,7 +36,7 @@
     <![endif]-->
     <script src="{% static 'jquery-ui-1.11.4/jquery-ui.min.js' %}"></script>
 	<!--<link href="{% static 'jquery-ui-1.11.4/jquery-ui.css' %}" rel="stylesheet">-->
-	  
+  {% block style %}{% endblock %}	  
   </head>
 
   <body>
@@ -49,7 +49,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-					<a class="navbar-brand" href="{% url 'ezbio-intro' %}">EzBio</a>
+					<a class="navbar-brand" href="{% url 'ezbio-intro' %}">Pathogen DB</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
 					<ul class="nav navbar-nav navbar-right">
@@ -73,8 +73,10 @@
 		  <li class="pathogen_list"><a href="{% url 'pathogen' %}">Pathogen List</a></li>
 		  <li class="sample_list"><a href="{% url 'sample' %}">Sample List</a></li>
 		  <li class="sample_upload"><a href="{% url 'sample-upload' %}">Sample Upload</a></li>
+		  <!--
 		  <li class="report_test"><a href="{% url 'report' %}">Report Test</a></li>
 		  <li class="dc_test"><a href="{% url 'test' %}">DC Test</a></li>
+		  -->
         </ul>
       </div>
 		<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
