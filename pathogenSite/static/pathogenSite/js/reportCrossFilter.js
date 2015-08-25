@@ -196,7 +196,6 @@ var topGenusCount = 5,
 
 	speciesPerSamples = [];
 
-
 /* populate variables 
  * */
 speciesDimGroup.all = function(){

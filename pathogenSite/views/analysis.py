@@ -11,7 +11,8 @@ from CheckPathogen import Reporter
 
 
 class PathogenAnalysis(TemplateView):
-	template_name = 'pathogenSite/report/report.html'
+	template_name = 'pathogenSite/report/new_report.html'
+	#template_name = 'pathogenSite/report/report.html'
 
 	def post(self, request, *args, **kwargs):
 		"""
@@ -23,11 +24,9 @@ class PathogenAnalysis(TemplateView):
 		context = self.get_context_data()
 		clc_files = request.POST.getlist('sample')
 
-		sample_index = 0
 		total_micro_dist = {}
 		samples = []
 		for clc_file in clc_files:
-			sample_index += 1
 			clc_file = json.loads(clc_file)
 			file_path = clc_file['path']
 			sample_name = clc_file['name']
@@ -35,7 +34,7 @@ class PathogenAnalysis(TemplateView):
 
 			reporter = Reporter(file_path)
 			reporter.check_rank_count()
-			micro_dist = reporter.get_micro_dist()
+			micro_dist = reporter.get_micro_dist(end_rank='phylum')
 			total_micro_dist[sample_name] = []
 			for comp in micro_dist:
 				comp['sample'] = sample_name
