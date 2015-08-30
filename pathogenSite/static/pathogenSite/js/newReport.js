@@ -29,6 +29,7 @@ $(document).ready(function () {
 	
 	var totalCount = sampleTotalCount(oriData);
 	var data = parseDataForDC(oriData);
+	var sampleOrder = ["85_cm", "22_cm", "26_cm", "29_cm"];
 
 
 
@@ -221,7 +222,7 @@ $(document).ready(function () {
 				.width(1100)
 				.height(600)
 				.margins({top:20, right:150, bottom:50, left:50})
-				.x(d3.scale.ordinal())
+				.x(d3.scale.ordinal().domain(sampleOrder))
 				.xUnits(dc.units.ordinal)
 				.brushOn(false)
 				.xAxisLabel("Samples")
@@ -241,7 +242,7 @@ $(document).ready(function () {
 			dc.renderAll();	
 			var options = this.checkOptions();
 			controller.filterByCheckedPathogenArray(options[1]);
-			this.renderPlot(options[0], options[1], 5, options[2], 0.7);
+			this.renderPlot(options[0], options[1], 5, options[2]);
 			this.renderTable( controller.getTableData(options[0]) );
 
 			// set each option event
@@ -265,7 +266,7 @@ $(document).ready(function () {
 			$("#rank-selector, #unit-selector, #pathogen, #nonpathogen").on(
 				"change", function () {
 					var options = view.checkOptions();
-					view.renderPlot(options[0], options[1], 5, options[2], 0.4);
+					view.renderPlot(options[0], options[1], 5, options[2]);
 					var tableData = controller.getTableData(options[0]);
 					view.renderTable(tableData);
 				}
@@ -289,35 +290,13 @@ $(document).ready(function () {
 			return [rank, checkedArray, yUnit];
 		},
 
-		renderPlot: function (rank, checkedArray, topNumber, yUnit, tempY){
+		renderPlot: function (rank, checkedArray, topNumber, yUnit){
 			var parsedData = controller.getDataPerSample(rank, checkedArray, 
 					topNumber, yUnit);
 			var mainPlot = plot.mainPlot;
 			mainPlot
 				.dimension(model.sampleDim)
-				.on("renderlet", function (chart) {
-					var options = view.checkOptions();
-					var organisms = ["human", "animal", "plant"];
-					for (var i=0,max=organisms.length; i<max; i+=1){
-						console.log('good', options, organisms[i]);
-						var organismData = controller.getLineData();
-					}
-					var left_y = 0.1, right_y = tempY; 
-					console.log('5555', chart);
-					var extra_data = [
-						{x: chart.x().range()[0]+chart.x().rangeBand()/2, y: chart.y()(left_y)}, 
-						{x: chart.x().range()[3]+chart.x().rangeBand()/2, y: chart.y()(right_y)}
-					];
-					var line = d3.svg.line() 
-						.x(function(d) { return d.x; }) 
-						.y(function(d) { return d.y; })
-						.interpolate('cardinal');
-					var path = chart.select('g.chart-body')
-						.selectAll('path.extra').data([extra_data]);
-					path.enter().append('path').attr('class', 'extra')
-						.attr('stroke', 'yellow');
-					path.attr('d', line);
-				})
+				.on("renderlet", this.rederOverlaidLinePlot)
 				.group(parsedData[0]['value'],parsedData[0]['key']);
 			for (var i=1, max=parsedData.length; i < max; i += 1){
 				var comp = parsedData[i];
@@ -325,6 +304,31 @@ $(document).ready(function () {
 			}
 			
 			dc.redrawAll();
+		},
+
+		rederOverlaidLinePlot: function (chart) {
+		var options = view.checkOptions();
+			var organisms = ["human", "animal", "plant"];
+			for (var i=0,max=organisms.length; i<max; i+=1){
+				console.log('good', options, organisms[i]);
+				var organismData = controller.getLineData();
+			}
+			var left_y = 0.1, right_y = 0.7; 
+			console.log('5555', chart);
+			var extra_data = [
+				{x: chart.x().range()[0]+chart.x().rangeBand()/2, y: chart.y()(left_y)}, 
+				{x: chart.x().range()[3]+chart.x().rangeBand()/2, y: chart.y()(right_y)}
+			];
+			var line = d3.svg.line() 
+				.x(function(d) { return d.x; }) 
+				.y(function(d) { return d.y; })
+				.interpolate('cardinal');
+			var path = chart.select('g.chart-body')
+				.selectAll('path.extra').data([extra_data]);
+			path.enter().append('path').attr('class', 'extra')
+				.attr('stroke', 'yellow');
+			path.attr('d', line);
+			path.attr('fill', none);
 		},
 
 		renderTable: function (tableData) {
