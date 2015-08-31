@@ -70,7 +70,7 @@ $(document).ready(function () {
 	model.pathogenDim = model.cr.dimension(function (d){return d.is_pathogen;});
 	model.ranks = ["phylum", "class", "order", "family", "genus", "species"];
 	model.allOrganismOptions = ["human_primary", "human_opportunistic", 
-		"animal_primary", "animal_opportunitic", 
+		"animal_primary", "animal_opportunistic", 
 		"plant_primary", "plant_opportunistic"];
 	model.colors = ["#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3",
 		"#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", 
@@ -294,7 +294,6 @@ $(document).ready(function () {
 			var options = this.checkOptions();
 			controller.filterByCheckedPathogenArray(options[1]);
 			this.renderPlot(options[0], options[1], 5, options[2]);
-			this.renderLineLegend();
 			this.renderTable( controller.getTableData(options[0]) );
 
 			// set each option event
@@ -374,12 +373,16 @@ $(document).ready(function () {
 				legendOffset = 430
 
 			var allOrganismOptions = controller.getAllOrganismOptions();
+			var organismOptions = view.checkOrganismOption();
 			var colors = controller.getLegendColors();
+
+
+			d3.select("svg").selectAll("g.legend").remove();
+
 			var legend = d3.select("svg")
 				.selectAll(".legend")
-				.data(allOrganismOptions)
-				.enter()
-				.append("g")
+				.data(organismOptions)
+				.enter().append("g")
 				.attr("class", "legend")
 				.attr("transform", function (d, i) {
 					var y = legendOffset + 
@@ -401,6 +404,8 @@ $(document).ready(function () {
 					d = d[0].toUpperCase() + d.slice(1) + " pathogen";
 					return d; 
 				});
+
+
 		},
 
 		renderOverlaidLinePlot: function (chart) {
@@ -461,6 +466,7 @@ $(document).ready(function () {
 						.attr("stroke-width", "3px");
 				}
 			}
+			view.renderLineLegend();
 		},
 
 		renderTable: function (tableData) {
