@@ -23,13 +23,15 @@ $(document).ready(function () {
 				totalCount[sample] += datum[i]['count'];
 			}
 		}
-		return totalCount;
+		return totalCount; // {sample1:count, sample2: count}
 	}
 
 	
 	var totalCount = sampleTotalCount(oriData);
 	var data = parseDataForDC(oriData);
-	var sampleOrder = ["85_cm", "22_cm", "26_cm", "29_cm"]; // should be changed
+	var sampleList = [];
+	for (var sample in oriData) { sampleList.push(sample); }
+	//console.log(data);
 
 
 
@@ -42,6 +44,30 @@ $(document).ready(function () {
 	model.sampleDimGroup = model.sampleDim.group().reduceSum(function (d) {
 		return d.count / totalCount[d.sample];
 	});
+	model.samplePerPathogenDimGroup = model.sampleDim.group().reduce(
+		function (p, d) {
+			if (d.pathogen_human == 3){ p.human_primary += d.count;
+			} else if (d.pathogen_human == 4){p.human_opportunistic += d.count;}
+			if (d.pathogen_animal == 3){ p.animal_primary += d.count;
+			} else if (d.pathogen_animal == 4){p.animal_opportunistic+=d.count;}
+			if (d.pathogen_plant == 3){ p.plant_primary += d.count;
+			} else if (d.pathogen_plant == 4){p.plant_opportunistic += d.count;}
+			return p;
+		},
+		function (p, d) {
+			if (d.pathogen_human == 3){ p.human_primary -= d.count;
+			} else if (d.pathogen_human == 4){p.human_opportunistic -= d.count;}
+			if (d.pathogen_animal == 3){ p.animal_primary -= d.count;
+			} else if (d.pathogen_animal == 4){p.animal_opportunistic-=d.count;}
+			if (d.pathogen_plant == 3){ p.plant_primary -= d.count;
+			} else if (d.pathogen_plant == 4){p.plant_opportunistic -= d.count;}
+			return p;
+		},
+		function () {
+			return {human_primary:0, human_opportunistic:0, animal_primary:0,
+			animal_opportunistic:0, plant_primary:0, plant_opportunistic:0};
+		}
+	);
 	model.pathogenDim = model.cr.dimension(function (d){return d.is_pathogen;});
 	model.ranks = ["phylum", "class", "order", "family", "genus", "species"];
 
@@ -158,7 +184,15 @@ $(document).ready(function () {
 			return tableData;
 		},
 
-		getLineData: function() { return 1;},
+		getLineData: function() { 
+			var resultData = {};
+			var lineData = model.samplePerPathogenDimGroup.all();
+			for (var i=0,max=lineData.length; i<max; i+=1){
+				var lineDatum = lineData[i];
+				resultData[lineDatum.key] = lineDatum.value;
+			}
+			return resultData;
+		},
 	
 		filterByCheckedPathogenArray: function (checkedArray) {
 			model.pathogenDim.filter(function (d) {
@@ -222,7 +256,7 @@ $(document).ready(function () {
 				.width(1100)
 				.height(600)
 				.margins({top:20, right:150, bottom:50, left:50})
-				.x(d3.scale.ordinal().domain(sampleOrder))
+				.x(d3.scale.ordinal().domain(sampleList))
 				.xUnits(dc.units.ordinal)
 				.brushOn(false)
 				.xAxisLabel("Samples")
@@ -290,13 +324,21 @@ $(document).ready(function () {
 			return [rank, checkedArray, yUnit];
 		},
 
+		checkOrganismOption: function () {
+			var checkedArray = [];
+			$(".organism:checked").each(function () {
+				checkedArray.push($(this).val());
+			});
+			return checkedArray;
+		},
+
 		renderPlot: function (rank, checkedArray, topNumber, yUnit){
 			var parsedData = controller.getDataPerSample(rank, checkedArray, 
 					topNumber, yUnit);
 			var mainPlot = plot.mainPlot;
 			mainPlot
 				.dimension(model.sampleDim)
-				.on("renderlet", this.rederOverlaidLinePlot)
+				.on("renderlet", this.renderOverlaidLinePlot)
 				.group(parsedData[0]['value'],parsedData[0]['key']);
 			for (var i=1, max=parsedData.length; i < max; i += 1){
 				var comp = parsedData[i];
@@ -306,34 +348,64 @@ $(document).ready(function () {
 			dc.redrawAll();
 		},
 
-		rederOverlaidLinePlot: function (chart) {
+		renderOverlaidLinePlot: function (chart) {
 			var options = view.checkOptions();
-			var organisms = ["human", "animal", "plant"];
-			for (var i=0,max=organisms.length; i<max; i+=1){
-				console.log('good', options, organisms[i]);
-				var organismData = controller.getLineData();
+			var allOrganismOptions = ["human_primary", "human_opportunistic", 
+				"animal_primary", "animal_opportunitic", 
+				"plant_primary", "plant_opportunistic"];
+			var organismOptions = view.checkOrganismOption();
+			var colors = {human_primary:"red", human_opportunistic:"pink",
+				animal_primary:"yellow", animal_opportunistic:"green",
+				plant_primary:"blue", plant_opportunistic:"deepskyblue"
+			};
+			var lineData = controller.getLineData();
+			for (var i=0,max=allOrganismOptions.length; i<max; i+=1){
+				var option = allOrganismOptions[i];
+				var extraData = [];
+				if (organismOptions.indexOf(option) > -1){
+					for (var j=0,maxJ=sampleList.length; j<maxJ; j+=1){
+						var sample = sampleList[j];
+						var x = chart.x().range()[j] + chart.x().rangeBand()/2;
+						if (options[2] === "count") {
+							var y = chart.y()(lineData[sample][option]);
+						} else {
+							var y = chart.y()(lineData[sample][option]/
+									totalCount[sample]);
+						}
+						extraData.push({x:x, y:y});
+					}
+				}
+				var line = d3.svg.line() 
+					.x(function(d) { return d.x; }) 
+					.y(function(d) { return d.y; })
+					.interpolate('cardinal');
+				var path = chart.select('g.chart-body')
+					.selectAll('path.'+option).data([extraData]);
+				path.enter().append('path').attr('class', option)
+					.attr('stroke', colors[option]);
+				path.attr('d', line);
+				path.attr('stroke-width', 2);
+				path.attr('fill', 'none');
+				if ($("circle."+option).length) {
+					chart.select('g.chart-body')
+						.selectAll('circle.'+option)
+						.data(extraData).exit().remove()
+						.attr("cx", function (d) { return d.x; })
+						.attr("cy", function (d) { return d.y; });
+				} else {
+					var circle = chart.select('g.chart-body')
+						.selectAll('circle.'+option)
+						.data(extraData);
+					circle.enter().append('circle')
+						.attr('class', option).attr("r", 4)
+						.attr("cx", function (d) { return d.x; })
+						.attr("cy", function (d) { return d.y; })
+						.attr("fill", colors[option])
+						.attr("stroke","black")
+						.attr("stroke-opacity","0.4")
+						.attr("stroke-width", "1px");
+				}
 			}
-			var left_y = 0.1, right_y = 0.7; 
-			var extra_data = [
-				{x: chart.x().range()[0]+chart.x().rangeBand()/2, y: chart.y()(left_y)}, 
-				{x: chart.x().range()[3]+chart.x().rangeBand()/2, y: chart.y()(right_y)}
-			];
-			var line = d3.svg.line() 
-				.x(function(d) { return d.x; }) 
-				.y(function(d) { return d.y; })
-				.interpolate('cardinal');
-			var circle = chart.select('g.chart-body').selectAll('circle')
-				.data(extra_data).enter().append('circle').attr("r", 4)
-				.attr("cx", function (d) { console.log(d.x);return d.x; })
-				.attr("cy", function (d) { return d.y; })
-				.attr("fill", "yellow");
-			var path = chart.select('g.chart-body')
-				.selectAll('path.extra').data([extra_data]);
-			path.enter().append('path').attr('class', 'extra')
-				.attr('stroke', 'yellow');
-			path.attr('d', line);
-			path.attr('stroke-width', 2);
-			path.attr('fill', 'none');
 		},
 
 		renderTable: function (tableData) {
