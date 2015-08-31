@@ -359,6 +359,8 @@ $(document).ready(function () {
 				plant_primary:"blue", plant_opportunistic:"deepskyblue"
 			};
 			var lineData = controller.getLineData();
+			//plot legend
+
 			for (var i=0,max=allOrganismOptions.length; i<max; i+=1){
 				var option = allOrganismOptions[i];
 				var extraData = [];
@@ -375,6 +377,7 @@ $(document).ready(function () {
 						extraData.push({x:x, y:y});
 					}
 				}
+				// plot line
 				var line = d3.svg.line() 
 					.x(function(d) { return d.x; }) 
 					.y(function(d) { return d.y; })
@@ -387,6 +390,7 @@ $(document).ready(function () {
 					.attr('d', line)
 					.attr('stroke-width', 2)
 					.attr('fill', 'none');
+				//plot circle
 				if ($("circle."+option).length) {
 					chart.select('g.chart-body')
 						.selectAll('circle.'+option)
