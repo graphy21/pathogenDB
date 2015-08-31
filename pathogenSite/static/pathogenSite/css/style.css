@@ -1,0 +1,16 @@
+.legend {
+	font-size: 11px;
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	color: #333;
+}
+/*
+#main-plot g.stack._5 > rect.bar {
+	stroke: none;
+	fill: black;
+}
+
+#main-plot g.dc-legend-item:nth-child(6) > rect:nth-child(1) {
+	stroke: none;
+	fill: black;
+}
+*/

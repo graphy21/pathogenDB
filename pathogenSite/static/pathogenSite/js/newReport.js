@@ -31,7 +31,6 @@ $(document).ready(function () {
 	var data = parseDataForDC(oriData);
 	var sampleList = [];
 	for (var sample in oriData) { sampleList.push(sample); }
-	//console.log(data);
 
 
 
@@ -70,6 +69,16 @@ $(document).ready(function () {
 	);
 	model.pathogenDim = model.cr.dimension(function (d){return d.is_pathogen;});
 	model.ranks = ["phylum", "class", "order", "family", "genus", "species"];
+	model.allOrganismOptions = ["human_primary", "human_opportunistic", 
+		"animal_primary", "animal_opportunitic", 
+		"plant_primary", "plant_opportunistic"];
+	model.colors = ["#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3",
+		"#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", 
+		"#ffed6f"];
+	model.legendColors = {human_primary:"red", human_opportunistic:"pink",
+		animal_primary:"yellow", animal_opportunistic:"green",
+		plant_primary:"blue", plant_opportunistic:"deepskyblue"
+	};
 
 	for (var i=0, max=model.ranks.length; i<max; i+=1){
 		var rank = model.ranks[i];
@@ -132,6 +141,10 @@ $(document).ready(function () {
 			view.init()
 		},
 
+		getColors: function () { return model.colors; },
+
+		getLegendColors: function () { return model.legendColors; },
+
 		getTableData: function(rank) {
 			var selecteData = model[rank + "DimGroupInfo"].all();
 			var tableData = [];
@@ -183,6 +196,8 @@ $(document).ready(function () {
 			}
 			return tableData;
 		},
+		
+		getAllOrganismOptions: function () { return model.allOrganismOptions; },
 
 		getLineData: function() { 
 			var resultData = {};
@@ -251,6 +266,7 @@ $(document).ready(function () {
 	var view = {
 		init: function(){
 			// set main plot
+			var plotColors = controller.getColors();
 			var mainPlot = plot.mainPlot;
 			mainPlot
 				.width(1100)
@@ -270,6 +286,7 @@ $(document).ready(function () {
 				.legend(dc.legend().x(950).y(20).itemHeight(13).gap(5)
 					.horizontal(false).legendWidth(140).itemWidth(70))
 				.group(model['sampleDimGroup']);
+			mainPlot.ordinalColors( plotColors );
 			mainPlot.yAxis().tickFormat(function(v) {
 					return (v * 100).toFixed(2);});
 
@@ -277,6 +294,7 @@ $(document).ready(function () {
 			var options = this.checkOptions();
 			controller.filterByCheckedPathogenArray(options[1]);
 			this.renderPlot(options[0], options[1], 5, options[2]);
+			this.renderLineLegend();
 			this.renderTable( controller.getTableData(options[0]) );
 
 			// set each option event
@@ -348,19 +366,49 @@ $(document).ready(function () {
 			dc.redrawAll();
 		},
 
+		renderLineLegend: function () {
+			var colors = controller.getLegendColors();
+			var legendHeight = 5,
+				legendWidth = 18,
+				legendSpacing = 12,
+				legendOffset = 430
+
+			var allOrganismOptions = controller.getAllOrganismOptions();
+			var colors = controller.getLegendColors();
+			var legend = d3.select("svg")
+				.selectAll(".legend")
+				.data(allOrganismOptions)
+				.enter()
+				.append("g")
+				.attr("class", "legend")
+				.attr("transform", function (d, i) {
+					var y = legendOffset + 
+						(legendHeight + legendSpacing) * i;
+					return "translate(950," + y +")"; 
+				});
+
+			legend.append("rect")
+				.attr("width", legendWidth)
+				.attr("height", legendHeight)
+				.style("fill", function (d) { return colors[d]; })
+				.style("stroke", "none");
+
+			legend.append("text")
+				.attr("x", legendWidth + 4)
+				.attr("y", 6)
+				.text(function (d) { 
+					d = d.replace("_", " ");
+					d = d[0].toUpperCase() + d.slice(1) + " pathogen";
+					return d; 
+				});
+		},
+
 		renderOverlaidLinePlot: function (chart) {
 			var options = view.checkOptions();
-			var allOrganismOptions = ["human_primary", "human_opportunistic", 
-				"animal_primary", "animal_opportunitic", 
-				"plant_primary", "plant_opportunistic"];
+			var allOrganismOptions = controller.getAllOrganismOptions();
 			var organismOptions = view.checkOrganismOption();
-			var colors = {human_primary:"red", human_opportunistic:"pink",
-				animal_primary:"yellow", animal_opportunistic:"green",
-				plant_primary:"blue", plant_opportunistic:"deepskyblue"
-			};
+			var colors = controller.getLegendColors();
 			var lineData = controller.getLineData();
-			//plot legend
-
 			for (var i=0,max=allOrganismOptions.length; i<max; i+=1){
 				var option = allOrganismOptions[i];
 				var extraData = [];
@@ -381,14 +429,14 @@ $(document).ready(function () {
 				var line = d3.svg.line() 
 					.x(function(d) { return d.x; }) 
 					.y(function(d) { return d.y; })
-					.interpolate('cardinal');
+					.interpolate('linear');
 				var path = chart.select('g.chart-body')
 					.selectAll('path.'+option).data([extraData]);
 				path.enter().append('path');
 				path.attr('class', option)
 					.attr('stroke', colors[option])
 					.attr('d', line)
-					.attr('stroke-width', 2)
+					.attr('stroke-width', 4)
 					.attr('fill', 'none');
 				//plot circle
 				if ($("circle."+option).length) {
@@ -404,13 +452,13 @@ $(document).ready(function () {
 						.selectAll('circle.'+option)
 						.data(extraData);
 					circle.enter().append('circle')
-						.attr('class', option).attr("r", 4)
+						.attr('class', option).attr("r", 6)
 						.attr("cx", function (d) { return d.x; })
 						.attr("cy", function (d) { return d.y; })
 						.attr("fill", colors[option])
-						.attr("stroke","black")
-						.attr("stroke-opacity","0.4")
-						.attr("stroke-width", "1px");
+						.attr("stroke","white")
+						.attr("stroke-opacity","0.7")
+						.attr("stroke-width", "3px");
 				}
 			}
 		},
