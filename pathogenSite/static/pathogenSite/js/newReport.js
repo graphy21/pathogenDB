@@ -265,7 +265,7 @@ $(document).ready(function () {
 				.dimension(model.sampleDim)
 				.barPadding(0.1)
 				.outerPadding(0.05)
-				.transitionDuration(1000)
+				.transitionDuration(800)
 				.renderHorizontalGridLines(true)
 				.legend(dc.legend().x(950).y(20).itemHeight(13).gap(5)
 					.horizontal(false).legendWidth(140).itemWidth(70))
@@ -381,15 +381,18 @@ $(document).ready(function () {
 					.interpolate('cardinal');
 				var path = chart.select('g.chart-body')
 					.selectAll('path.'+option).data([extraData]);
-				path.enter().append('path').attr('class', option)
-					.attr('stroke', colors[option]);
-				path.attr('d', line);
-				path.attr('stroke-width', 2);
-				path.attr('fill', 'none');
+				path.enter().append('path');
+				path.attr('class', option)
+					.attr('stroke', colors[option])
+					.attr('d', line)
+					.attr('stroke-width', 2)
+					.attr('fill', 'none');
 				if ($("circle."+option).length) {
 					chart.select('g.chart-body')
 						.selectAll('circle.'+option)
-						.data(extraData).exit().remove()
+						.data(extraData).exit().remove();
+					chart.select('g.chart-body')
+						.selectAll('circle.'+option)
 						.attr("cx", function (d) { return d.x; })
 						.attr("cy", function (d) { return d.y; });
 				} else {
