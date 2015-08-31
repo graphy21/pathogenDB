@@ -29,7 +29,7 @@ $(document).ready(function () {
 	
 	var totalCount = sampleTotalCount(oriData);
 	var data = parseDataForDC(oriData);
-	var sampleOrder = ["85_cm", "22_cm", "26_cm", "29_cm"];
+	var sampleOrder = ["85_cm", "22_cm", "26_cm", "29_cm"]; // should be changed
 
 
 
@@ -158,7 +158,7 @@ $(document).ready(function () {
 			return tableData;
 		},
 
-		getLineData: function() {console.log('well'); return 1;},
+		getLineData: function() { return 1;},
 	
 		filterByCheckedPathogenArray: function (checkedArray) {
 			model.pathogenDim.filter(function (d) {
@@ -263,7 +263,7 @@ $(document).ready(function () {
 				controller.filterByCheckedPathogenArray(options[1]);
 			});
 			// set options' common event
-			$("#rank-selector, #unit-selector, #pathogen, #nonpathogen").on(
+			$("#rank-selector, #unit-selector, input[type=checkbox]").on(
 				"change", function () {
 					var options = view.checkOptions();
 					view.renderPlot(options[0], options[1], 5, options[2]);
@@ -307,14 +307,13 @@ $(document).ready(function () {
 		},
 
 		rederOverlaidLinePlot: function (chart) {
-		var options = view.checkOptions();
+			var options = view.checkOptions();
 			var organisms = ["human", "animal", "plant"];
 			for (var i=0,max=organisms.length; i<max; i+=1){
 				console.log('good', options, organisms[i]);
 				var organismData = controller.getLineData();
 			}
 			var left_y = 0.1, right_y = 0.7; 
-			console.log('5555', chart);
 			var extra_data = [
 				{x: chart.x().range()[0]+chart.x().rangeBand()/2, y: chart.y()(left_y)}, 
 				{x: chart.x().range()[3]+chart.x().rangeBand()/2, y: chart.y()(right_y)}
@@ -323,12 +322,18 @@ $(document).ready(function () {
 				.x(function(d) { return d.x; }) 
 				.y(function(d) { return d.y; })
 				.interpolate('cardinal');
+			var circle = chart.select('g.chart-body').selectAll('circle')
+				.data(extra_data).enter().append('circle').attr("r", 4)
+				.attr("cx", function (d) { console.log(d.x);return d.x; })
+				.attr("cy", function (d) { return d.y; })
+				.attr("fill", "yellow");
 			var path = chart.select('g.chart-body')
 				.selectAll('path.extra').data([extra_data]);
 			path.enter().append('path').attr('class', 'extra')
 				.attr('stroke', 'yellow');
 			path.attr('d', line);
-			path.attr('fill', none);
+			path.attr('stroke-width', 2);
+			path.attr('fill', 'none');
 		},
 
 		renderTable: function (tableData) {
