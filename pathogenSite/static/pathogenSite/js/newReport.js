@@ -75,9 +75,10 @@ $(document).ready(function () {
 	model.colors = ["#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3",
 		"#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", 
 		"#ffed6f"];
-	model.legendColors = {human_primary:"red", human_opportunistic:"pink",
-		animal_primary:"yellow", animal_opportunistic:"green",
-		plant_primary:"blue", plant_opportunistic:"deepskyblue"
+	model.legendColors = {
+		human_primary:"#0d47a1", human_opportunistic:"#0096f5",
+		animal_primary:"#f4511e", animal_opportunistic:"#fb8c00",
+		plant_primary:"#009688", plant_opportunistic:"#8bc34a"
 	};
 
 	for (var i=0, max=model.ranks.length; i<max; i+=1){
@@ -445,7 +446,7 @@ $(document).ready(function () {
 				path.attr('class', option)
 					.attr('stroke', colors[option])
 					.attr('d', line)
-					.attr('stroke-width', 4)
+					.attr('stroke-width', 2)
 					.attr('fill', 'none');
 				//plot circle
 				chart.select('g.chart-body')
