@@ -274,7 +274,6 @@ $(document).ready(function () {
 				.margins({top:20, right:150, bottom:50, left:50})
 				.x(d3.scale.ordinal().domain(sampleList))
 				.xUnits(dc.units.ordinal)
-				.brushOn(false)
 				.xAxisLabel("Samples")
 				.yAxisLabel("Percentage (%)")
 				.elasticY(true)
@@ -284,7 +283,7 @@ $(document).ready(function () {
 				.transitionDuration(800)
 				.renderHorizontalGridLines(true)
 				.legend(dc.legend().x(950).y(20).itemHeight(13).gap(5)
-					.horizontal(false).legendWidth(140).itemWidth(70))
+				.horizontal(false).legendWidth(140).itemWidth(70))
 				.group(model['sampleDimGroup']);
 			mainPlot.ordinalColors( plotColors );
 			mainPlot.yAxis().tickFormat(function(v) {
@@ -357,6 +356,8 @@ $(document).ready(function () {
 				.dimension(model.sampleDim)
 				.on("renderlet", this.renderOverlaidLinePlot)
 				.group(parsedData[0]['value'],parsedData[0]['key']);
+			var plotColors = controller.getColors();
+			mainPlot.ordinalColors( plotColors ); //////
 			for (var i=1, max=parsedData.length; i < max; i += 1){
 				var comp = parsedData[i];
 				mainPlot.stack(comp['value'], comp['key']);
