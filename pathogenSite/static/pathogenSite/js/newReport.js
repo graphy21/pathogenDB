@@ -423,11 +423,14 @@ $(document).ready(function () {
 						var x = chart.x().range()[j] + chart.x().rangeBand()/2;
 						if (options[2] === "count") {
 							var y = chart.y()(lineData[sample][option]);
+							var value = lineData[sample][option].toString();
 						} else {
 							var y = chart.y()(lineData[sample][option]/
 									totalCount[sample]);
+							var value = (lineData[sample][option] / 
+								totalCount[sample] * 100).toFixed(2) + " %";
 						}
-						extraData.push({x:x, y:y});
+						extraData.push({x:x, y:y, name:option, value:value});
 					}
 				}
 				// plot line
@@ -444,29 +447,49 @@ $(document).ready(function () {
 					.attr('stroke-width', 4)
 					.attr('fill', 'none');
 				//plot circle
-				if ($("circle."+option).length) {
-					chart.select('g.chart-body')
-						.selectAll('circle.'+option)
-						.data(extraData).exit().remove();
-					chart.select('g.chart-body')
-						.selectAll('circle.'+option)
-						.attr("cx", function (d) { return d.x; })
-						.attr("cy", function (d) { return d.y; });
-				} else {
-					var circle = chart.select('g.chart-body')
-						.selectAll('circle.'+option)
-						.data(extraData);
-					circle.enter().append('circle')
-						.attr('class', option).attr("r", 6)
-						.attr("cx", function (d) { return d.x; })
-						.attr("cy", function (d) { return d.y; })
-						.attr("fill", colors[option])
-						.attr("stroke","white")
-						.attr("stroke-opacity","0.7")
-						.attr("stroke-width", "3px");
-				}
+				chart.select('g.chart-body')
+					.selectAll('circle.'+option)
+					.remove();
+
+				var circle = chart.select('g.chart-body')
+					.selectAll('circle.'+option)
+					.data(extraData);
+
+				circle.enter().append('circle')
+					.attr('class', option).attr("r", 6)
+					.attr("cx", function (d) { return d.x; })
+					.attr("cy", function (d) { return d.y; })
+					.attr("fill", colors[option])
+					.attr("stroke","white")
+					.attr("stroke-opacity","0.7")
+					.attr("stroke-width", "3px")
+					.on("mouseover", view.showPopover)
+					.on("mouseout", view.removePopover);
+				
+				chart.select('g.chart-body')
+					.selectAll('circle.'+option)   
+					.data(extraData)
+					.on("mouseover", view.showPopover)
+					.on("mouseout", view.removePopover);
 			}
 			view.renderLineLegend();
+		},
+
+		showPopover: function (d) {
+			$(this).popover({
+				title: d.name.charAt(0).toUpperCase() + 
+					d.name.replace("_"," ").slice(1) + " pathogen",
+				placement: "auto top",
+				container: "body",
+				trigger: "manual",
+				html: true,
+				content: function() { return d.value; }
+			});
+			$(this).popover('show');
+		},
+
+		removePopover: function (d) {
+			$(".popover").each(function () {$(this).remove();})
 		},
 
 		renderTable: function (tableData) {
