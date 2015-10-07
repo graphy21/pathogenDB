@@ -1,0 +1,6 @@
+[client]
+host = 147.46.65.202
+database = ssu_prok_150727
+user = chunlab
+password = tprbs8153
+default-character-set = utf8

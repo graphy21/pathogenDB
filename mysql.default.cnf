@@ -1,0 +1,6 @@
+[client]
+host = 147.46.65.202
+database = django_default
+user = chunlab
+password = tprbs8153
+default-character-set = utf8
