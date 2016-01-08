@@ -24,12 +24,12 @@
 	<script src="{% static 'bootstrap/js/jquery.min.js' %}"></script>
 	<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 	<script src="{% static 'jquery-ui-1.11.4/jquery-ui.min.js'%}"></script>
+	<script src="https://www.google.com/jsapi"></script>
 	<script src="{% static 'd3/js/d3.min.js'%}"></script>
 	<script src="{% static 'crossfilter/js/crossfilter.min.js'%}"></script>
 	<script src="{% static 'dc/js/dc.min.js'%}"></script>
 	<script src="{% static 'DataTables-1.10.8/media/js/jquery.dataTables.min.js' %}"></script>
 	<script src="{% static 'DataTables-1.10.8/media/js/dataTables.bootstrap.min.js' %}"></script>
-	<script src="{% static 'pathogenSite/js/newReport.js'%}"></script>
 
   </head>
 
@@ -147,12 +147,71 @@
 				</thead>
 			</table>
 		</div>
+
+		<div class="row">
+			<hr style="border-width:3px;">
+			<h3>Sample Report</h3>
+		</div>  
+				
+		{% for sample in samples %}
+		<div class="row" style="padding:3px;">
+			<button class="btn btn-info showReport">Show Report</button>
+			{{ sample }}
+		</div>
+			
+		<!--<div style="display:none;">-->
+		<div class="displayNone">
+			<div class="div1 row">
+				<hr>
+				<h3>Data Summary</h3>
+				<h4>Read Count Assignment Flow</h4>
+				<div id="{{ sample }}-div1-sankey1" class="col-sm-12"></div>
+				<br>
+				<h4>Detected Pathogens & Possible Diseases</h4>
+				<div id="{{ sample }}-div1-bubble1" class="col-sm-offset-2"></div>
+			</div>
+			
+			<div class="div2 row">
+				<hr>
+				<h3>Data Details</h3>
+				<h4>Total Microbiome Distribution</h4>
+				<div id="{{ sample }}-div2-table1" class="col-sm-3"></div>
+				<div id="{{ sample }}-div2-pie1" class="col-sm-4"></div>
+				<div id="{{ sample }}-div2-pie2" class="col-sm-4"></div>
+			</div>
+			
+			<div class="div3 row">
+				<hr>
+				<h4>Pathogen Distribution</h4>
+				<div id="{{ sample }}-div3-pie1" class="col-sm-5"></div>
+				<div id="{{ sample }}-div3-column1" class="col-sm-4"></div>
+			</div>
+			<div class="row">
+				<div id="{{ sample }}-div3-table" class="col-sm-12"></div>
+			</div>
+			<div class="row">
+				<hr>
+			</div>
+			<!--</div>-->
+		</div> 
+		{% endfor %}
+
+
+
+
 	</div>
+
+
+
+
 
 	<script>
 		var oriData = {{ data|safe }}
 		// All MVC are in newReport.js.
 	</script>
+	<script src="{% static 'pathogenSite/js/newReport.js'%}"></script>
+	<script src="{% static 'pathogenSite/js/colorbrewer.js' %}"></script>	
+	<script src="{% static 'pathogenSite/js/reportPerSample.js' %}"></script>
   </body>
 </html>
 
