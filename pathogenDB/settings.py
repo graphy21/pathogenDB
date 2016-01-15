@@ -87,12 +87,12 @@ DATABASES = {
 			'read_default_file': os.path.join(BASE_DIR, 'mysql.pathogen.cnf') 
 		},
 	},
-    'ssuProk': {
-        'ENGINE': 'django.db.backends.mysql',
-		'OPTIONS': { 
-			'read_default_file': os.path.join(BASE_DIR, 'mysql.ssuProk.cnf') 
-		},
-    },
+    #'ssuProk': {
+    #    'ENGINE': 'django.db.backends.mysql',
+	#	'OPTIONS': { 
+	#		'read_default_file': os.path.join(BASE_DIR, 'mysql.ssuProk.cnf') 
+	#	},
+    #},
 }
 
 DATABASE_ROUTERS = ['pathogenDB.routers.PathogenRouter',\
@@ -128,7 +128,7 @@ INSTALLED_APPS += (
 
 # ssuProkSite settings
 
-INSTALLED_APPS += (
-		'ssuProkSite',
-)
+#INSTALLED_APPS += (
+#		'ssuProkSite',
+#)
 

@@ -23,5 +23,5 @@ urlpatterns = [
 	url(r'^accounts/logout', 'django.contrib.auth.views.logout', {'next_page': '/'}, name='logout'),
     url(r'^$', views.index),
 	url(r'^pathogenSite/', include('pathogenSite.urls')),
-	url(r'^taxon-group/', include('ssuProkSite.urls')),
+	#url(r'^taxon-group/', include('ssuProkSite.urls')),
 ]

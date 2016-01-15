@@ -1,6 +1,17 @@
+/**
+ * @file Tried to adopt MVC (model-view-controller) pattern.<br/> 
+ * <b>D3.js</b>, <b>Crossfilter.js</b>, <b>dc.js</b>, <b>DataTables</b> were used in this script.
+ *
+ */
 
 $(document).ready(function () {
 
+	/** Change data format from object to list.
+	 * Input argument object's sample key is added to sample property in output array element.
+	 * @function parseDataForDC
+	 * @param preData {object} {sample1: [{class: "Gammaproteobacteria", order: "Pasteurellales", family: "Pasteurellaceae", genus: "Haemophilus", species: "JQ448705_s", count: 8, is_pathogen: "Non Pathogen", pathogen_animal: 0, pathogen_human: 0, pathonge_plant: 0}, ... ],<br/> sample2: []}
+	 * @return {object[]} [{sample: "sample1", class: "Gammaproteobacteria", order: "Pasteurellales", family: "Pasteurellaceae", genus: "Haemophilus", species: "JQ448705_s", count: 8, is_pathogen: "Non Pathogen", pathogen_animal: 0, pathogen_human: 0, pathonge_plant: 0},<br/> {sample: "sample2",...}
+	 */
 	function parseDataForDC(preData) {
 		var data = [];
 		for (var k in preData){
@@ -14,6 +25,12 @@ $(document).ready(function () {
 		return data;
 	}
 
+	/** Extract total read count per sample.
+	 *
+	 * @function sampleTotalCount
+	 * @param data {object[]} same as arguement in "parseDataForDC"
+	 * @return {object} {sample1: 5618, sample2: 6678 ...} 
+	 */
 	function sampleTotalCount(data){
 		var totalCount = {}
 		for (var sample in data){
@@ -26,7 +43,6 @@ $(document).ready(function () {
 		return totalCount; // {sample1:count, sample2: count}
 	}
 
-	
 	var totalCount = sampleTotalCount(oriData);
 	var data = parseDataForDC(oriData);
 	var sampleList = [];
@@ -35,9 +51,19 @@ $(document).ready(function () {
 
 
 	
-	/*****
-	 ***** model
-	 *****/
+	/** MODEL PART
+	 * 
+	 * @namespace model
+	 * @property {object} cr - crossfilter instance
+	 * @property {object} sampleDim - crossfilter dimension by "sample" property
+	 * @property {object} sampleDimGroup - crossfilter group of sampleDim
+	 * @property {object} samplePerPathogenDimGroup - crossfilter group of sampleDim
+	 * @property {object} pathogenDim - crossfilter dimension by "is_pathogen" property
+	 * @property {string[]} ranks - taxonomic ranks from phylum to species
+	 * @property {string[]} allOrganismOptions - pathogen classification list
+	 * @property {string[]} colors - color list
+	 * @property {object} legendColors - legend color object with pathogen classification as key and color as value
+	 */
 	var model = { cr: crossfilter(data) };
 	model.sampleDim = model.cr.dimension(function (d) {return d.sample;});
 	model.sampleDimGroup = model.sampleDim.group().reduceSum(function (d) {
@@ -114,6 +140,13 @@ $(document).ready(function () {
 		return parseInt(d.split(" ")[0].replace(",",""));
 	};
 
+
+	/** PLOT PART
+	 *
+	 * @namespace plot
+	 * @property {object} mainPlot - DC.js barchart instance
+	 * @property {object} mainTable - DataTables instance
+	 */
 	var plot = { 
 		mainPlot: dc.barChart("#main-plot"),
 		mainTable: $("#main-table").DataTable({
@@ -133,19 +166,34 @@ $(document).ready(function () {
 
 
 
-
-	/*****
-	 ***** controller
-	 *****/
+	/** CONTROLLER PART
+	 *
+	 * @namespace controller
+	 */
 	var controller = {
+		/** @memberof controller 
+		 * @return null
+		 * @description Execute view.init function.
+		 */
 		init: function () {
 			view.init()
 		},
 
+		/** @memberof controller 
+		 * @return model.colors {string[]}
+		 */
 		getColors: function () { return model.colors; },
 
+		/** @memberof controller 
+		 * @return model.legendColors {object}
+		 */
 		getLegendColors: function () { return model.legendColors; },
-
+	
+		/** @memberof controller 
+		 * @param rank {string} one of the model.ranks
+		 * @return {array[]} [["Haemophilus influenzae", "13,193( 48.97%)", "primary", "none", "none"], ...]
+		 * @description Return table row values.
+		 */
 		getTableData: function(rank) {
 			var selecteData = model[rank + "DimGroupInfo"].all();
 			var tableData = [];
@@ -198,8 +246,15 @@ $(document).ready(function () {
 			return tableData;
 		},
 		
+		/** @memberof controller 
+		 * @return model.allOrganismOptions
+		 */
 		getAllOrganismOptions: function () { return model.allOrganismOptions; },
 
+		/** @memberof controller 
+		 * @return {object} {sample1: {animal_opportunistic:0, animal_primary:0, human_opportunistic: 347, human_primary:5515, plant_opportunistic:0, plant_primary: 0}, sample2: {...}, ...}
+		 * @description Return the count of each pathogen classification per sample.
+		 */
 		getLineData: function() { 
 			var resultData = {};
 			var lineData = model.samplePerPathogenDimGroup.all();
@@ -210,13 +265,27 @@ $(document).ready(function () {
 			return resultData;
 		},
 	
+		/** @memberof controller 
+		 * @param checkedArray {string[]} Checked pathogen classification options.
+		 * @return null
+		 * @description Filter model.pathogenDim with checkedArray.
+		 */
 		filterByCheckedPathogenArray: function (checkedArray) {
 			model.pathogenDim.filter(function (d) {
 				return checkedArray.indexOf(d) > -1;
 			});
 		},
 
+		/** @memberof controller 
+		 * @param rank {string} one of the model.ranks
+		 * @param checkedArray {string[]} Checked pathogen classification options.
+		 * @param topNumber {integer}
+		 * @param yUnit {string} percentage|count
+		 * @return {object[]} 
+		 * @description aa
+		 */
 		getDataPerSample: function (rank, checkedArray, topNumber, yUnit) {
+			console.log('1111', rank, checkedArray, topNumber, yUnit);
 			// get top ranks 
 			var topRanks = model[rank+"DimGroup"].top(topNumber);
 			var topRankNames = [];
@@ -233,10 +302,16 @@ $(document).ready(function () {
 				this.getSampleDimGroupByType(rank, topRankNames, true,
 					checkedArray, yUnit)
 			});
+			console.log('pppp', parsedData);
 			return parsedData;
 
 		},
 
+		/** @memberof controller 
+		 * @param rank {}
+		 * @return model.colors
+		 * @description aa
+		 */
 		getSampleDimGroupByType: function(rank, types, exclude, checkPathogen,
 				yUnit) {
 			var group = model.sampleDim.group().reduceSum( function (d) {
@@ -261,12 +336,12 @@ $(document).ready(function () {
 
 
 
-	/*****
-	 ***** view
-	 *****/
+	/** VIEW PART
+	 * 
+	 * @namespace view
+	 */
 	var view = {
 		init: function(){
-			// set main plot
 			var plotColors = controller.getColors();
 			var mainPlot = plot.mainPlot;
 			mainPlot
